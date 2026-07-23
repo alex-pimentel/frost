@@ -16,8 +16,9 @@ export class Pipeline {
     this.onStep = onStep
   }
 
-  async run(input: string): Promise<string> {
-    const response = await this.thinkAgent.think(input, this.onStep)
+  async run(input: string, onStep?: PipelineCallback): Promise<string> {
+    const callback = onStep ?? this.onStep
+    const response = await this.thinkAgent.think(input, callback)
     return response.text
   }
 }

@@ -28,7 +28,7 @@ export class Orchestrator {
     if (this.mode === 'dictation') {
       return text
     }
-    return this.pipeline.run(text)
+    return this.pipeline.run(text, onStep)
   }
 
   setMode(mode: FrostMode): void {
