@@ -302,6 +302,7 @@ let hotkeyManager = null;
 let databaseManager = null;
 let clipboardManager = null;
 let whisperManager = null;
+let frostIntegration = null;
 let parakeetManager = null;
 let diarizationManager = null;
 let trayManager = null;
@@ -1166,6 +1167,12 @@ async function startApp() {
     debugLogger.debug("Windows paste tool status", nircmdStatus);
   }
 
+  const { FrostIntegration } = require("./src/helpers/frostIntegration");
+  frostIntegration = new FrostIntegration();
+  frostIntegration.initialize().catch((err) => {
+    debugLogger.debug("Frost integration init error (non-fatal)", { error: err.message });
+  });
+
   trayManager.setWindows(windowManager.mainWindow, windowManager.controlPanelWindow);
   trayManager.setWindowManager(windowManager);
   trayManager.setCreateControlPanelCallback(() => windowManager.createControlPanelWindow());
@@ -1799,4 +1806,5 @@ function performSyncTeardown() {
   if (ipcHandlers) ipcHandlers._cleanupTextEditMonitor();
   if (textEditMonitor) textEditMonitor.stopMonitoring();
   if (updateManager) updateManager.cleanup();
+  if (frostIntegration) frostIntegration.destroy();
 }

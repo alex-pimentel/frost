@@ -994,4 +994,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getUpdateNotificationData: () => ipcRenderer.invoke("get-update-notification-data"),
   updateNotificationReady: () => ipcRenderer.invoke("update-notification-ready"),
   updateNotificationRespond: (action) => ipcRenderer.invoke("update-notification-respond", action),
+
+  // Frost integration
+  frostSetMode: (mode) => ipcRenderer.invoke("frost:setMode", mode),
+  frostGetMode: () => ipcRenderer.invoke("frost:getMode"),
+  frostChat: (text) => ipcRenderer.invoke("frost:chat", text),
 });
