@@ -20,3 +20,18 @@ export interface ToolCallRecord {
   result: string
   timestamp: number
 }
+
+export interface PipelineStep {
+  type: 'stt' | 'think' | 'cactus' | 'tts'
+  status: 'pending' | 'running' | 'completed' | 'error'
+  durationMs?: number
+  error?: string
+}
+
+export type PipelineCallback = (step: PipelineStep) => void
+
+export interface ThinkAgentConfig {
+  systemPrompt: string
+  modelProvider: string
+  modelId: string
+}
