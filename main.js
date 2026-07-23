@@ -205,7 +205,7 @@ function isOAuthSchemeRegistered() {
 // Register custom protocol for OAuth callbacks.
 // In development, always include the app path argument so macOS/Windows/Linux
 // can launch the project app instead of opening bare Electron.
-function registerOpenWhisprProtocol() {
+function registerFrostProtocol() {
   const protocol = OAUTH_PROTOCOL;
   const htmlHandler = process.platform === "linux" ? getDefaultHtmlHandler() : null;
 
@@ -228,7 +228,7 @@ function registerOpenWhisprProtocol() {
 // fall back to probing the system MIME database for an actual handler. This keeps
 // OAuth enabled where the callback can resolve (deb/rpm/flatpak/AUR) and correctly
 // gated where it can't (AppImage/tar.gz with no scheme registration).
-const protocolRegistered = registerOpenWhisprProtocol() || isOAuthSchemeRegistered();
+const protocolRegistered = registerFrostProtocol() || isOAuthSchemeRegistered();
 if (!protocolRegistered) {
   console.warn(`[Auth] Failed to register ${OAUTH_PROTOCOL}:// protocol handler`);
 }
@@ -330,7 +330,7 @@ const WHISPER_WAKE_REWARM_DELAY_MS = 3000;
 let wakeRewarmTimer = null;
 
 function parseAuthBridgePort() {
-  const raw = (process.env.OPENWHISPR_AUTH_BRIDGE_PORT || "").trim();
+  const raw = (process.env.FROST_AUTH_BRIDGE_PORT || "").trim();
   if (!raw) return DEFAULT_AUTH_BRIDGE_PORT;
 
   const parsed = Number(raw);

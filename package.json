@@ -88,8 +88,8 @@
     "desktop-app"
   ],
   "author": {
-    "name": "Frost Team",
-    "email": "support@frost.app"
+    "name": "OpenWhispr Team",
+    "email": "support@openwhispr.com"
   },
   "license": "MIT",
   "devDependencies": {
