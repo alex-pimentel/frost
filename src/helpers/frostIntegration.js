@@ -12,16 +12,10 @@ class FrostIntegration {
   async initialize() {
     if (this.initialized) return;
     try {
-      let OmpBridge;
-      try {
-        OmpBridge = require("../main/omp-bridge").OmpBridge;
-      } catch (_) {
-        OmpBridge = null;
-      }
+      const { OmpBridge } = require("../main/ompBridge.cjs");
+      this.ompBridge = new OmpBridge();
 
-      if (OmpBridge) {
-        this.ompBridge = new OmpBridge();
-      }
+      await this.ompBridge.initialize();
 
       this.orchestrator = {
         mode: this.mode,
@@ -29,16 +23,17 @@ class FrostIntegration {
           this.mode = mode;
         },
         async processVoiceInput(text) {
-          if (this.mode === "dictation" || !this.chatProvider) return text;
-          return text;
+          if (this.mode === "dictation") return text;
+          if (!this.ompBridge) return text;
+          const response = await this.ompBridge.prompt(text);
+          return response.text;
         },
         async destroy() {
+          if (this.ompBridge) await this.ompBridge.destroy();
         },
       };
 
-      if (this.ompBridge) {
-        this.orchestrator.chatProvider = this.ompBridge;
-      }
+      this.orchestrator.ompBridge = this.ompBridge;
 
       this.registerIpcHandlers();
       this.initialized = true;
