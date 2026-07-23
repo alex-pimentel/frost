@@ -9,6 +9,7 @@ import { formatHotkeyListLabel } from "./utils/hotkeys";
 import { useWindowDrag } from "./hooks/useWindowDrag";
 import { useAudioRecording } from "./hooks/useAudioRecording";
 import { useSettingsStore } from "./stores/settingsStore";
+import { ChatModeView } from "./components/chat/ChatModeView";
 
 // Sound Wave Icon Component (for idle/hover states)
 const SoundWaveIcon = ({ size = 16 }) => {
@@ -78,6 +79,14 @@ const Tooltip = ({ children, content, emoji, align = "center" }) => {
 };
 
 export default function App() {
+  const [mode, setMode] = useState("dictation");
+
+  useEffect(() => {
+    window.electronAPI?.frostGetMode?.().then((m) => {
+      if (m) setMode(m);
+    });
+  }, []);
+
   const [isHovered, setIsHovered] = useState(false);
   const [isCommandMenuOpen, setIsCommandMenuOpen] = useState(false);
   const commandMenuRef = useRef(null);
@@ -343,6 +352,14 @@ export default function App() {
   };
 
   const micProps = getMicButtonProps();
+
+  if (mode === "chat") {
+    return (
+      <div className="dictation-window">
+        <ChatModeView />
+      </div>
+    );
+  }
 
   return (
     <div className="dictation-window">
