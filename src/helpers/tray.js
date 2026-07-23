@@ -1,4 +1,4 @@
-const { Tray, Menu, nativeImage, app } = require("electron");
+const { Tray, Menu, nativeImage, app, BrowserWindow } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const debugLogger = require("./debugLogger");
@@ -12,6 +12,7 @@ class TrayManager {
     this.controlPanelWindow = null;
     this.windowManager = null;
     this.attachedControlPanels = new WeakSet();
+    this.mode = "dictation";
   }
 
   setWindows(mainWindow, controlPanelWindow) {
@@ -251,8 +252,33 @@ class TrayManager {
     }
   }
 
+  setFrostIntegration(instance) {
+    this.frostIntegration = instance;
+  }
+
+  setMode(mode) {
+    if (mode !== "dictation" && mode !== "chat") return;
+    this.mode = mode;
+
+    if (this.frostIntegration) {
+      this.frostIntegration.mode = mode;
+      if (this.frostIntegration.orchestrator) {
+        this.frostIntegration.orchestrator.setMode(mode);
+      }
+    }
+
+    BrowserWindow.getAllWindows().forEach((win) => {
+      if (!win.isDestroyed()) {
+        win.webContents.send("frost:modeChanged", mode);
+      }
+    });
+
+    this.updateTrayMenu();
+  }
+
   buildContextMenuTemplate() {
     const dictationVisible = this.windowManager?.isDictationPanelVisible?.() ?? false;
+    const currentMode = this.mode || "dictation";
 
     return [
       {
@@ -279,6 +305,24 @@ class TrayManager {
       },
       { type: "separator" },
       {
+        label: `Mode: ${currentMode === "dictation" ? "Dictation" : "Chat"}`,
+        submenu: [
+          {
+            label: "Dictation",
+            type: "radio",
+            checked: currentMode === "dictation",
+            click: () => this.setMode("dictation"),
+          },
+          {
+            label: "Chat",
+            type: "radio",
+            checked: currentMode === "chat",
+            click: () => this.setMode("chat"),
+          },
+        ],
+      },
+      { type: "separator" },
+      {
         label: i18nMain.t("tray.quit"),
         click: () => {
           debugLogger.info("Quitting app via tray menu", undefined, "tray");
@@ -292,7 +336,8 @@ class TrayManager {
     if (!this.tray) return;
 
     const contextMenu = Menu.buildFromTemplate(this.buildContextMenuTemplate());
-    this.tray.setToolTip(i18nMain.t("tray.tooltip"));
+    const modeLabel = this.mode === "chat" ? " [Chat]" : "";
+    this.tray.setToolTip(i18nMain.t("tray.tooltip") + modeLabel);
     this.tray.setContextMenu(contextMenu);
   }
 

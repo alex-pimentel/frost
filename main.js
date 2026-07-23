@@ -1173,6 +1173,7 @@ async function startApp() {
     debugLogger.debug("Frost integration init error (non-fatal)", { error: err.message });
   });
 
+  trayManager.setFrostIntegration(frostIntegration);
   trayManager.setWindows(windowManager.mainWindow, windowManager.controlPanelWindow);
   trayManager.setWindowManager(windowManager);
   trayManager.setCreateControlPanelCallback(() => windowManager.createControlPanelWindow());
