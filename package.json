@@ -1,11 +1,11 @@
 {
-  "name": "open-whispr",
+  "name": "frost",
   "version": "1.7.6",
-  "description": "A desktop dictation application using whisper.cpp for speech-to-text transcription",
+  "description": "Voice-to-text dictation and AI agent desktop app",
   "main": "main.js",
   "private": true,
   "engines": {
-    "node": ">=24"
+    "node": ">=22"
   },
   "scripts": {
     "compile:globe": "node scripts/build-globe-listener.js",
@@ -88,8 +88,8 @@
     "desktop-app"
   ],
   "author": {
-    "name": "OpenWhispr Team",
-    "email": "support@openwhispr.com"
+    "name": "Frost Team",
+    "email": "support@frost.app"
   },
   "license": "MIT",
   "devDependencies": {

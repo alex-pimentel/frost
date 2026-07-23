@@ -48,11 +48,11 @@ try {
 
 const VALID_CHANNELS = new Set(["development", "staging", "production"]);
 const DEFAULT_OAUTH_PROTOCOL_BY_CHANNEL = {
-  development: "openwhispr-dev",
-  staging: "openwhispr-staging",
-  production: "openwhispr",
+  development: "frost-dev",
+  staging: "frost-staging",
+  production: "frost",
 };
-const BASE_WINDOWS_APP_ID = "com.gizmolabs.openwhispr";
+const BASE_WINDOWS_APP_ID = "com.frost.app";
 const DEFAULT_AUTH_BRIDGE_PORT = 5199;
 
 function isElectronBinaryExec() {
@@ -72,7 +72,7 @@ function inferDefaultChannel() {
 }
 
 function resolveAppChannel() {
-  const rawChannel = (process.env.OPENWHISPR_CHANNEL || process.env.VITE_OPENWHISPR_CHANNEL || "")
+  const rawChannel = (process.env.FROST_CHANNEL || process.env.VITE_FROST_CHANNEL || "")
     .trim()
     .toLowerCase();
 
@@ -84,14 +84,14 @@ function resolveAppChannel() {
 }
 
 const APP_CHANNEL = resolveAppChannel();
-process.env.OPENWHISPR_CHANNEL = APP_CHANNEL;
+process.env.FROST_CHANNEL = APP_CHANNEL;
 
 function configureChannelUserDataPath() {
   if (APP_CHANNEL === "production") {
     return;
   }
 
-  const isolatedPath = path.join(app.getPath("appData"), `OpenWhispr-${APP_CHANNEL}`);
+  const isolatedPath = path.join(app.getPath("appData"), `Frost-${APP_CHANNEL}`);
   app.setPath("userData", isolatedPath);
 }
 
@@ -123,7 +123,7 @@ if (process.platform === "linux" && process.env.XDG_SESSION_TYPE === "wayland") 
 // Set desktop filename so Wayland compositors can match windows to the .desktop entry.
 // This allows XDG portals (e.g. PipeWire) to persist permissions across sessions.
 if (process.platform === "linux") {
-  app.setDesktopName("open-whispr.desktop");
+  app.setDesktopName("frost.desktop");
 }
 
 // Group all windows under single taskbar entry on Windows
@@ -134,7 +134,7 @@ if (process.platform === "win32") {
 }
 
 function getOAuthProtocol() {
-  const fromEnv = (process.env.VITE_OPENWHISPR_PROTOCOL || process.env.OPENWHISPR_PROTOCOL || "")
+  const fromEnv = (process.env.VITE_FROST_PROTOCOL || process.env.FROST_PROTOCOL || "")
     .trim()
     .toLowerCase();
 
@@ -242,8 +242,8 @@ if (!gotSingleInstanceLock) {
 const isLiveWindow = (window) => window && !window.isDestroyed();
 
 // Ensure macOS menus use the proper casing for the app name
-if (process.platform === "darwin" && app.getName() !== "OpenWhispr") {
-  app.setName("OpenWhispr");
+if (process.platform === "darwin" && app.getName() !== "Frost") {
+  app.setName("Frost");
 }
 
 // Add global error handling for uncaught exceptions
@@ -652,14 +652,14 @@ function resolveAuthUrl() {
     process.env.AUTH_URL ||
     process.env.VITE_AUTH_URL ||
     runtimeEnv.VITE_AUTH_URL ||
-    "https://auth.openwhispr.com"
+    "https://auth.frost.app"
   );
 }
 
 function getOauthCookieName() {
   return process.env.NODE_ENV === "production"
-    ? "__Secure-openwhispr.session_token"
-    : "openwhispr.session_token";
+    ? "__Secure-frost.session_token"
+    : "frost.session_token";
 }
 
 // Older website builds send the signed cookie value as `?token=`; trade it
@@ -842,7 +842,7 @@ function startAuthBridgeServer() {
 
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
     res.end(
-      "<html><body><h3>OpenWhispr sign-in complete.</h3><p>You can close this tab.</p></body></html>"
+      "<html><body><h3>Frost sign-in complete.</h3><p>You can close this tab.</p></body></html>"
     );
   });
 
@@ -885,8 +885,8 @@ async function startApp() {
   session.defaultSession.webRequest.onBeforeSendHeaders(
     {
       urls: [
-        "https://auth.openwhispr.com/*",
-        "https://api.openwhispr.com/*",
+        "https://auth.frost.app/*",
+        "https://api.frost.app/*",
         "http://localhost:3000/*",
         "http://127.0.0.1:3000/*",
       ],
