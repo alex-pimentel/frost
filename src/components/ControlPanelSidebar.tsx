@@ -81,12 +81,7 @@ export default function ControlPanelSidebar({
   const { active: activeWorkspace } = useWorkspace();
 
   const showLimitBanner = authLoaded && isSignedIn && !isProUser && isOverLimit;
-  const showUpgradeBanner =
-    !showLimitBanner &&
-    authLoaded &&
-    (!isSignedIn || usageLoaded !== false) &&
-    !isProUser &&
-    !upgradeDismissed;
+  const showUpgradeBanner = false;
 
   const navItems: {
     id: ControlPanelView;
