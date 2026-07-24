@@ -1,3 +1,8 @@
+// Skip OpenWhispr onboarding and auth for Frost
+localStorage.setItem("onboardingCompleted", "true");
+localStorage.setItem("authenticationSkipped", "true");
+localStorage.setItem("skipAuth", "true");
+
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
