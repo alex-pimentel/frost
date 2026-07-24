@@ -182,7 +182,7 @@ function restoreHtmlHandlerIfChanged(original) {
   }
 }
 
-// True source of truth for whether openwhispr:// resolves on Linux — the same
+// True source of truth for whether frost:// resolves on Linux — the same
 // MIME database xdg-open consults. Returns true for deb/rpm/flatpak/AUR installs
 // (scheme registered via the packaged .desktop MimeType) and false for AppImage/
 // tar.gz runs where it genuinely isn't registered, so we never enable a dead-end

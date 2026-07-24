@@ -61,10 +61,11 @@ export function ChatModeView() {
       <div className="border-t border-border/30 p-3">
         <div className="flex gap-2">
           <input
-            className="flex-1 rounded-lg border border-border/30 bg-surface-1 px-4 py-2 text-sm outline-none focus:border-primary/30"
+            className="flex-1 rounded-lg border border-border/30 bg-surface-1 px-4 py-2 text-sm outline-none focus:border-primary/30 disabled:opacity-50"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
+            disabled={isSending}
             placeholder="Type a message..."
           />
           <button
