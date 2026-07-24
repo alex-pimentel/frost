@@ -1,21 +1,23 @@
 const debugLogger = require("../helpers/debugLogger");
 
 class OmpBridge {
-  constructor() {
+  constructor(settings) {
     this.session = null;
-    this.sessionManager = null;
-    this.modelRegistry = null;
+    this.settings = settings || { providerUrl: "http://localhost:1234/v1", apiKey: "", modelId: "" };
   }
 
   async initialize() {
+    if (this.settings.modelId) {
+      debugLogger.debug("OmpBridge ready with direct API", { providerUrl: this.settings.providerUrl, modelId: this.settings.modelId });
+      return;
+    }
     let sdk;
     try {
       sdk = require("@oh-my-pi/pi-coding-agent");
     } catch (err) {
-      debugLogger.debug("omp SDK not available — chat mode runs without it", { error: err.message });
+      debugLogger.debug("omp SDK not available", { error: err.message });
       return;
     }
-
     try {
       const auth = await sdk.discoverAuthStorage();
       this.sessionManager = sdk.SessionManager.inMemory();
@@ -33,12 +35,67 @@ class OmpBridge {
     }
   }
 
+  async updateSettings(settings) {
+    this.settings = { ...this.settings, ...settings };
+  }
+
   async prompt(text) {
-    if (!this.session) return { text: "I'm not connected to a model yet. Configure one in Settings." };
+    if (this.settings.modelId) {
+      return this.promptDirect(text);
+    }
+    if (!this.session) {
+      return { text: "No model configured. Open Settings and set up your chat provider." };
+    }
     await this.session.prompt(text);
     const messages = this.session.messages || [];
     const last = messages[messages.length - 1];
     return { text: last?.content || "", toolCalls: null, error: null };
+  }
+
+  async promptDirect(text) {
+    const url = `${this.settings.providerUrl.replace(/\/+$/, "")}/chat/completions`;
+    const body = JSON.stringify({
+      model: this.settings.modelId,
+      messages: [{ role: "user", content: text }],
+      stream: false,
+    });
+    const headers = { "Content-Type": "application/json" };
+    if (this.settings.apiKey) headers["Authorization"] = `Bearer ${this.settings.apiKey}`;
+
+    try {
+      const u = new URL(url);
+      const http = require("http");
+      return new Promise((resolve) => {
+        const options = {
+          hostname: u.hostname,
+          port: u.port,
+          path: u.pathname,
+          method: "POST",
+          headers,
+          timeout: 60000,
+        };
+        const req = http.request(options, (res) => {
+          let data = "";
+          res.on("data", (chunk) => { data += chunk; });
+          res.on("end", () => {
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed?.choices?.[0]?.message?.content || "";
+              resolve({ text: content, toolCalls: null, error: null });
+            } catch {
+              resolve({ text: "", toolCalls: null, error: "Failed to parse response" });
+            }
+          });
+        });
+        req.on("error", (err) => {
+          resolve({ text: "", toolCalls: null, error: err.message });
+        });
+        req.write(body);
+        req.end();
+      });
+    } catch (err) {
+      return { text: "", toolCalls: null, error: err.message };
+    }
   }
 
   async destroy() {

@@ -999,6 +999,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   frostSetMode: (mode) => ipcRenderer.invoke("frost:setMode", mode),
   frostGetMode: () => ipcRenderer.invoke("frost:getMode"),
   frostChat: (text) => ipcRenderer.invoke("frost:chat", text),
+  frostGetSettings: () => ipcRenderer.invoke("frost:getSettings"),
+  frostSaveSettings: (settings) => ipcRenderer.invoke("frost:saveSettings", settings),
+  frostListModels: (providerUrl, apiKey) => ipcRenderer.invoke("frost:listModels", providerUrl, apiKey),
   onFrostModeChanged: registerListener(
     "frost:modeChanged",
     (callback) => (_event, mode) => callback(mode)

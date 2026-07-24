@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { MessageBubble } from './MessageBubble'
+import { SettingsDialog } from '../settings/SettingsDialog'
 
 export function ChatModeView() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const scrollRef = useRef(null)
 
   useEffect(() => {
@@ -47,6 +49,17 @@ export function ChatModeView() {
 
   return (
     <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between border-b border-border/30 px-4 py-2">
+        <span className="text-xs font-medium text-muted-foreground">Chat</span>
+        <button
+          className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-surface-1"
+          onClick={() => setSettingsOpen(true)}
+          title="Settings"
+        >
+          &#9881; Settings
+        </button>
+      </div>
+      <SettingsDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4">
         {messages.length === 0 ? (
           <div className="flex items-center justify-center h-full text-muted-foreground/50 text-sm select-none">
