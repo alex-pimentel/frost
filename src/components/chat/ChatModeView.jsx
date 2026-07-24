@@ -4,6 +4,7 @@ import { MessageBubble } from './MessageBubble'
 export function ChatModeView() {
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
+  const [isSending, setIsSending] = useState(false)
   const scrollRef = useRef(null)
 
   useEffect(() => {
@@ -13,7 +14,7 @@ export function ChatModeView() {
   }, [messages])
 
   const sendMessage = async () => {
-    if (!input.trim()) return
+    if (!input.trim() || isSending) return
     const userMsg = {
       id: crypto.randomUUID(),
       role: 'user',
@@ -22,15 +23,26 @@ export function ChatModeView() {
     }
     setMessages(prev => [...prev, userMsg])
     setInput('')
-
-    // Task 7 will replace this with a call to window.electronAPI.frostChat(input)
-    const response = {
-      id: crypto.randomUUID(),
-      role: 'assistant',
-      content: `[Frost response to: ${input}]`,
-      timestamp: Date.now()
+    setIsSending(true)
+    try {
+      const responseText = await window.electronAPI.frostChat(input)
+      const response = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: responseText,
+        timestamp: Date.now()
+      }
+      setMessages(prev => [...prev, response])
+    } catch (err) {
+      setMessages(prev => [...prev, {
+        id: crypto.randomUUID(),
+        role: 'system',
+        content: `Error: ${err}`,
+        timestamp: Date.now()
+      }])
+    } finally {
+      setIsSending(false)
     }
-    setMessages(prev => [...prev, response])
   }
 
   return (
@@ -58,9 +70,9 @@ export function ChatModeView() {
           <button
             className="rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             onClick={sendMessage}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isSending}
           >
-            Send
+            {isSending ? 'Sending...' : 'Send'}
           </button>
         </div>
       </div>
