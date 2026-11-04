@@ -1,7 +1,40 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect width="1024" height="1024" rx="241" fill="#2056DF"/>
-<circle cx="512" cy="512" r="314" fill="#2056DF" stroke="white" stroke-width="74"/>
-<path d="M512 383V641" stroke="white" stroke-width="74" stroke-linecap="round"/>
-<path d="M627 457V568" stroke="white" stroke-width="74" stroke-linecap="round"/>
-<path d="M397 457V568" stroke="white" stroke-width="74" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="bg" x1="512" y1="0" x2="512" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8FCBF3"/>
+      <stop offset="1" stop-color="#4A97D8"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#123A5C" flood-opacity="0.18"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" rx="241" fill="url(#bg)"/>
+
+  <g filter="url(#soft)">
+    <!-- orelhas: altas, base larga -->
+    <path d="M250 528 L286 206 Q292 180 320 196 L482 336 Z" fill="#FFFFFF"/>
+    <path d="M774 528 L738 206 Q732 180 704 196 L542 336 Z" fill="#FFFFFF"/>
+    <path d="M316 452 L340 272 L444 356 Z" fill="#B9DDF7"/>
+    <path d="M708 452 L684 272 L580 356 Z" fill="#B9DDF7"/>
+
+    <!-- cabeca: mais triangular, queixo afilado -->
+    <path d="M512 292 C648 292 776 396 792 536 C806 656 690 786 512 872 C334 786 218 656 232 536 C248 396 376 292 512 292 Z" fill="#FFFFFF"/>
+
+    <!-- focinho longo -->
+    <path d="M512 606 C582 606 630 666 630 718 C630 782 566 826 512 850 C458 826 394 782 394 718 C394 666 442 606 512 606 Z" fill="#E2F1FC"/>
+
+    <!-- olhos -->
+    <ellipse cx="422" cy="556" rx="30" ry="36" fill="#123A5C"/>
+    <ellipse cx="602" cy="556" rx="30" ry="36" fill="#123A5C"/>
+    <circle cx="411" cy="543" r="9" fill="#FFFFFF"/>
+    <circle cx="591" cy="543" r="9" fill="#FFFFFF"/>
+
+    <!-- nariz -->
+    <path d="M480 660 Q512 638 544 660 Q536 694 512 701 Q488 694 480 660 Z" fill="#123A5C"/>
+
+    <!-- boca -->
+    <path d="M512 703 Q501 727 484 733" stroke="#123A5C" stroke-width="10" stroke-linecap="round"/>
+    <path d="M512 703 Q523 727 540 733" stroke="#123A5C" stroke-width="10" stroke-linecap="round"/>
+  </g>
 </svg>
