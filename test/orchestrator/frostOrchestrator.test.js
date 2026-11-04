@@ -177,3 +177,92 @@ test("processText keeps the plain string contract used by IPC", async () => {
 
   assert.equal(await orchestrator.processText("tudo bem?"), "ok");
 });
+
+function fakeDecisionModel({ signals, error = null, shadow = true, latencyMs = 12 }) {
+  return {
+    remembered: [],
+    async classify() {
+      return { signals, error, latencyMs, shadow };
+    },
+    remember(text) {
+      this.remembered.push(text);
+    },
+  };
+}
+
+const AMBIGUOUS_QUESTION = "me fala sobre a api do banco que eu uso";
+
+test("shadow mode records the model verdict without changing the turn", async () => {
+  const bridge = createBridge();
+  const model = fakeDecisionModel({
+    signals: { intent: { value: "knowledge", confidence: 0.92 } },
+    shadow: true,
+  });
+  const orchestrator = new FrostOrchestrator({ bridge, decisionModel: model });
+
+  const result = await orchestrator.process(AMBIGUOUS_QUESTION);
+
+  assert.equal(result.decision.intent, INTENTS.GENERATE);
+  assert.equal(result.model.shadow, true);
+  assert.equal(result.model.fused.intent, "knowledge");
+  assert.equal(result.model.fused.source, "model");
+});
+
+test("active mode applies the fused intent", async () => {
+  const bridge = createBridge();
+  const model = fakeDecisionModel({
+    signals: {
+      intent: {
+        value: "knowledge",
+        confidence: 0.9,
+        distribution: { knowledge: 0.9, generate: 0.05 },
+      },
+    },
+    shadow: false,
+  });
+  const orchestrator = new FrostOrchestrator({ bridge, decisionModel: model });
+
+  const result = await orchestrator.process(AMBIGUOUS_QUESTION);
+
+  assert.equal(result.decision.intent, INTENTS.KNOWLEDGE);
+  assert.equal(result.model.fused.source, "model");
+});
+
+test("a model failure degrades back to the rules", async () => {
+  const bridge = createBridge();
+  const model = fakeDecisionModel({ signals: null, error: "timeout", shadow: false });
+  const orchestrator = new FrostOrchestrator({ bridge, decisionModel: model });
+
+  const result = await orchestrator.process("qual a capital da França?");
+
+  assert.equal(result.decision.intent, INTENTS.GENERATE);
+  assert.equal(result.model.fused.degraded, true);
+  assert.equal(result.model.fused.source, "rules");
+});
+
+test("the model never runs in dictation mode", async () => {
+  const bridge = createBridge();
+  let called = false;
+  const model = {
+    async classify() {
+      called = true;
+      return { signals: null, error: null, latencyMs: 0, shadow: true };
+    },
+    remember() {},
+  };
+  const orchestrator = new FrostOrchestrator({ bridge, decisionModel: model, mode: "dictation" });
+
+  await orchestrator.process("texto qualquer");
+
+  assert.equal(called, false);
+});
+
+test("the turn text is remembered for the next topic-shift question", async () => {
+  const bridge = createBridge();
+  const model = fakeDecisionModel({ signals: null, error: "disabled" });
+  const orchestrator = new FrostOrchestrator({ bridge, decisionModel: model });
+
+  await orchestrator.process("Hey Frost, como funciona o DNS?");
+
+  assert.deepEqual(model.remembered, ["como funciona o DNS?"]);
+});

@@ -12,6 +12,7 @@
 
 const { decide, INTENTS } = require("./decisionEngine");
 const { buildSystemPrompt } = require("./systemPrompt");
+const { fuseDecisions, TopicShiftTracker } = require("./decisionSignals");
 
 const CLARIFY_MESSAGES = {
   empty_input: "Estou aqui. O que você precisa?",
@@ -45,7 +46,10 @@ class FrostOrchestrator {
     this.wakeWords = deps.wakeWords;
     this.persona = deps.persona;
     this.mode = deps.mode ?? "chat";
+    this.decisionModel = deps.decisionModel ?? null;
+    this.topicTracker = new TopicShiftTracker();
     this.lastDecision = null;
+    this.lastModel = null;
   }
 
   setMode(mode) {
@@ -64,10 +68,69 @@ class FrostOrchestrator {
    * Runs a full turn and returns rich metadata (used by IPC handlers and tests).
    *
    * @param {string} input
-   * @returns {Promise<{ text: string, source: string, decision: object, knowledgeBlocks?: Array<object> }>}
+   * @returns {Promise<{ text: string, source: string, decision: object, knowledgeBlocks?: Array<object>, model?: object }>}
    */
   async process(input) {
-    const decision = decide(input, { mode: this.mode, wakeWords: this.wakeWords });
+    const result = await this._process(input);
+    return { ...result, model: this.lastModel };
+  }
+
+  /**
+   * Consults the statistical decision model, if configured, and fuses its signals
+   * with the deterministic rules.
+   *
+   * In shadow mode (the default) the fused decision is computed and recorded but the
+   * rule decision still drives the turn: promotion only happens after the evaluation
+   * harness shows the model beats the rules.
+   */
+  async evaluateDecision(ruleDecision) {
+    const model =
+      ruleDecision.intent === INTENTS.DICTATION
+        ? { signals: null, error: null, latencyMs: 0, shadow: true, skipped: true }
+        : await this.decisionModel.classify({ text: ruleDecision.text });
+
+    const fused = fuseDecisions({
+      ruleDecision,
+      modelSignals: model.signals,
+      topicTracker: this.topicTracker,
+      modelError: model.error,
+      modelLatencyMs: model.latencyMs,
+    });
+
+    this.lastModel = {
+      shadow: model.shadow !== false,
+      skipped: Boolean(model.skipped),
+      latencyMs: model.latencyMs,
+      error: model.error,
+      signals: model.signals,
+      fused,
+    };
+
+    this.logger.debug("Decision model", {
+      shadow: this.lastModel.shadow,
+      latencyMs: model.latencyMs,
+      error: model.error,
+      fusedIntent: fused.intent,
+      fusedSource: fused.source,
+      topicShift: fused.topicShift,
+    });
+
+    if (this.lastModel.shadow) return ruleDecision;
+
+    return {
+      ...ruleDecision,
+      intent: fused.intent,
+      confidence: fused.confidence,
+      signals: { ...ruleDecision.signals, isQuestion: fused.isQuestion },
+    };
+  }
+
+  async _process(input) {
+    const ruleDecision = decide(input, { mode: this.mode, wakeWords: this.wakeWords });
+    const decision = this.decisionModel
+      ? await this.evaluateDecision(ruleDecision)
+      : ruleDecision;
+    if (this.decisionModel) this.decisionModel.remember(ruleDecision.text);
     this.lastDecision = decision;
     this.logger.debug("Frost decision", {
       intent: decision.intent,

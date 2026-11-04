@@ -318,3 +318,7 @@ src/assets/Assets.car
 
 # Superpowers development artifacts
 .superpowers/
+
+# Python
+__pycache__/
+*.pyc

@@ -5,6 +5,7 @@ const http = require("http");
 const debugLogger = require("./debugLogger");
 const { FrostOrchestrator } = require("../main/orchestrator/frostOrchestrator");
 const { loadAnswerBank, saveAnswerBank } = require("../main/orchestrator/answerBankStore");
+const { DecisionModel } = require("../main/orchestrator/decisionModel");
 
 const SETTINGS_FILE = "frost-settings.json";
 const ANSWER_BANK_FILE = "frost-answers.json";
@@ -44,6 +45,7 @@ class FrostIntegration {
     this.ompBridge = null;
     this.orchestrator = null;
     this.answerBank = null;
+    this.decisionModel = null;
     this.settings = null;
     this.lastTurn = null;
   }
@@ -58,9 +60,21 @@ class FrostIntegration {
       this.ompBridge = new OmpBridge(this.settings);
       await this.ompBridge.initialize();
 
+      // Optional statistical decision model. Off unless a sidecar URL is provided;
+      // shadow mode is the default so it can be measured before it steers anything.
+      const decisionModelUrl = process.env.FROST_DECISION_MODEL_URL;
+      this.decisionModel = decisionModelUrl
+        ? new DecisionModel({
+            baseUrl: decisionModelUrl,
+            shadow: process.env.FROST_DECISION_MODEL_SHADOW !== "0",
+            logger: debugLogger,
+          })
+        : null;
+
       this.orchestrator = new FrostOrchestrator({
         bridge: this.ompBridge,
         answerBank: this.answerBank,
+        decisionModel: this.decisionModel,
         logger: debugLogger,
         mode: this.mode,
         persona: this.settings.persona,
@@ -96,6 +110,7 @@ class FrostIntegration {
           source: result.source,
           decision: result.decision,
           knowledgeBlocks: result.knowledgeBlocks ?? [],
+          model: result.model ?? null,
         };
         return result.text;
       } catch (err) {

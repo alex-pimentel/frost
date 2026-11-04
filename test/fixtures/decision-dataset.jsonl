@@ -1,0 +1,41 @@
+{"text": "oi", "isQuestion": false, "intent": "smalltalk"}
+{"text": "bom dia", "isQuestion": false, "intent": "smalltalk"}
+{"text": "obrigado, era isso", "isQuestion": false, "intent": "smalltalk"}
+{"text": "quem é você", "isQuestion": true, "intent": "smalltalk"}
+{"text": "tudo bem?", "isQuestion": true, "intent": "smalltalk"}
+{"text": "qual a capital da França?", "isQuestion": true, "intent": "generate"}
+{"text": "me explica o que é um vetor de embedding", "isQuestion": true, "intent": "generate"}
+{"text": "como funciona o protocolo QUIC?", "isQuestion": true, "intent": "generate"}
+{"text": "resume esse texto em três linhas", "isQuestion": false, "intent": "generate"}
+{"text": "traduza isso para inglês", "isQuestion": false, "intent": "generate"}
+{"text": "qual a diferença entre HTTP e HTTP/2?", "isQuestion": true, "intent": "generate"}
+{"text": "escreva um parágrafo sobre liderança", "isQuestion": false, "intent": "generate"}
+{"text": "o que eu anotei sobre a reunião de ontem?", "isQuestion": true, "intent": "knowledge"}
+{"text": "me lembra o que combinamos com o cliente", "isQuestion": false, "intent": "knowledge"}
+{"text": "segundo o que eu anotei, qual era o prazo?", "isQuestion": true, "intent": "knowledge"}
+{"text": "busca nas minhas notas sobre a proposta", "isQuestion": false, "intent": "knowledge"}
+{"text": "qual a minha experiência com Laravel?", "isQuestion": true, "intent": "knowledge"}
+{"text": "o que eu falei na reunião sobre orçamento?", "isQuestion": true, "intent": "knowledge"}
+{"text": "implemente um endpoint de login em src/api.php", "isQuestion": false, "intent": "code"}
+{"text": "corrija o bug do carrinho", "isQuestion": false, "intent": "code"}
+{"text": "rode os testes do módulo de pagamento", "isQuestion": false, "intent": "code"}
+{"text": "refatore essa função para usar async", "isQuestion": false, "intent": "code"}
+{"text": "crie a função de validação de CPF", "isQuestion": false, "intent": "code"}
+{"text": "como faço para corrigir o erro de build?", "isQuestion": true, "intent": "code"}
+{"text": "abre um pull request com essas mudanças", "isQuestion": false, "intent": "code"}
+{"text": "sim", "isQuestion": false, "intent": "clarify"}
+{"text": "não", "isQuestion": false, "intent": "clarify"}
+{"text": "aquilo lá", "isQuestion": false, "intent": "clarify"}
+{"text": "faz aquele negócio", "isQuestion": false, "intent": "clarify"}
+{"text": "ok", "isQuestion": false, "intent": "clarify"}
+{"text": "e o outro?", "isQuestion": true, "intent": "clarify"}
+{"text": "qual a previsão do tempo em São Paulo?", "isQuestion": true, "intent": "generate"}
+{"text": "lista os arquivos da pasta de downloads", "isQuestion": false, "intent": "code"}
+{"text": "quanto é 15% de 240?", "isQuestion": true, "intent": "generate"}
+{"text": "me manda o resumo da última reunião", "isQuestion": false, "intent": "knowledge"}
+{"text": "instale a dependência de testes", "isQuestion": false, "intent": "code"}
+{"text": "qual o prazo do projeto X?", "isQuestion": true, "intent": "knowledge", "topicShift": false}
+{"text": "mudando de assunto, como está o tempo?", "isQuestion": true, "intent": "generate", "topicShift": true}
+{"text": "agora me ajuda com o código do login", "isQuestion": false, "intent": "code", "topicShift": true}
+{"text": "e qual era o valor mesmo?", "isQuestion": true, "intent": "knowledge", "topicShift": false}
+{"text": "sobre aquilo que falamos, tem novidade?", "isQuestion": true, "intent": "knowledge", "topicShift": false}
