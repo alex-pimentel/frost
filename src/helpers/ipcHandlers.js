@@ -400,7 +400,6 @@ class IPCHandlers {
     this.parakeetManager = managers.parakeetManager;
     this.diarizationManager = managers.diarizationManager;
     this.windowManager = managers.windowManager;
-    this.updateManager = managers.updateManager;
     this.windowsKeyManager = managers.windowsKeyManager;
     this.linuxKeyManager = managers.linuxKeyManager;
     this.textEditMonitor = managers.textEditMonitor;
@@ -7828,20 +7827,8 @@ class IPCHandlers {
       }
     });
 
-    ipcMain.handle("check-for-updates", async () => {
-      return this.updateManager.checkForUpdates();
-    });
-
-    ipcMain.handle("download-update", async () => {
-      return this.updateManager.downloadUpdate();
-    });
-
-    ipcMain.handle("install-update", async () => {
-      return this.updateManager.installUpdate();
-    });
-
     ipcMain.handle("get-app-version", async () => {
-      return this.updateManager.getAppVersion();
+      return app.getVersion();
     });
 
     ipcMain.handle("get-post-migration-state", () => ({
@@ -7858,14 +7845,6 @@ class IPCHandlers {
 
     ipcMain.handle("mark-bundle-migration-dismissed", () => {
       postMigrationDetector.markBundleMigrationDismissed();
-    });
-
-    ipcMain.handle("get-update-status", async () => {
-      return this.updateManager.getUpdateStatus();
-    });
-
-    ipcMain.handle("get-update-info", async () => {
-      return this.updateManager.getUpdateInfo();
     });
 
     const fetchStreamingToken = async (event) => {
@@ -8816,26 +8795,6 @@ class IPCHandlers {
 
     ipcMain.handle("meeting-notification-ready", async () => {
       this.windowManager?.showNotificationWindow();
-    });
-
-    ipcMain.handle("get-update-notification-data", async () => {
-      return this.windowManager?._pendingUpdateNotificationData ?? null;
-    });
-
-    ipcMain.handle("update-notification-ready", async () => {
-      this.windowManager?.showUpdateNotificationWindow();
-    });
-
-    ipcMain.handle("update-notification-respond", async (_event, action) => {
-      this.windowManager?.dismissUpdateNotification();
-      if (action === "update") {
-        try {
-          await this.updateManager?.downloadUpdate();
-        } catch (error) {
-          console.error("Failed to start update download from notification:", error);
-        }
-      }
-      return { success: true };
     });
 
     // Note files (markdown mirror) handlers

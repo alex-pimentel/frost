@@ -17,7 +17,6 @@ import { ConfirmDialog, AlertDialog } from "./ui/dialog";
 import { useDialogs } from "../hooks/useDialogs";
 import { useHotkey } from "../hooks/useHotkey";
 import { useToast } from "./ui/useToast";
-import { useUpdater } from "../hooks/useUpdater";
 import { useSettings } from "../hooks/useSettings";
 import { useAuth } from "../hooks/useAuth";
 import { useUsage } from "../hooks/useUsage";
@@ -135,8 +134,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
     () => localStorage.getItem("gpuBannerDismissedUnified") === "true"
   );
   const cloudMigrationProcessed = useRef(false);
-  const updateReadyToastShown = useRef(false);
-  const updateErrorToastShown = useRef<Error | null>(null);
   const { hotkey } = useHotkey();
   const { toast } = useToast();
   const {
@@ -148,16 +145,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
   } = useSettings();
   const { isSignedIn, isLoaded: authLoaded, user } = useAuth();
   const usage = useUsage();
-
-  const {
-    status: updateStatus,
-    downloadProgress,
-    isDownloading,
-    isInstalling,
-    downloadUpdate,
-    installUpdate,
-    error: updateError,
-  } = useUpdater();
 
   const {
     confirmDialog,
@@ -223,35 +210,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
-
-  useEffect(() => {
-    if (updateStatus.updateDownloaded && !isDownloading) {
-      if (!updateReadyToastShown.current) {
-        updateReadyToastShown.current = true;
-        toast({
-          title: t("controlPanel.update.readyTitle"),
-          description: t("controlPanel.update.readyDescription"),
-          variant: "success",
-        });
-      }
-    } else {
-      updateReadyToastShown.current = false;
-    }
-  }, [updateStatus.updateDownloaded, isDownloading, toast, t]);
-
-  useEffect(() => {
-    if (updateError && updateError !== updateErrorToastShown.current) {
-      updateErrorToastShown.current = updateError;
-      toast({
-        title: t("controlPanel.update.problemTitle"),
-        description: t("controlPanel.update.problemDescription"),
-        variant: "destructive",
-      });
-    }
-    if (!updateError) {
-      updateErrorToastShown.current = null;
-    }
-  }, [updateError, toast, t]);
 
   useEffect(() => {
     const dispose = window.electronAPI?.onLimitReached?.(
@@ -678,72 +636,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
     loadTranscriptions(!showDiscarded);
   }, [loadTranscriptions, showDiscarded]);
 
-  const handleUpdateClick = async () => {
-    if (updateStatus.updateDownloaded) {
-      showConfirmDialog({
-        title: t("controlPanel.update.installTitle"),
-        description: t("controlPanel.update.installDescription"),
-        onConfirm: async () => {
-          try {
-            await installUpdate();
-          } catch (error) {
-            toast({
-              title: t("controlPanel.update.couldNotInstallTitle"),
-              description: t("controlPanel.update.couldNotInstallDescription"),
-              variant: "destructive",
-            });
-          }
-        },
-      });
-    } else if (updateStatus.updateAvailable && !isDownloading) {
-      try {
-        await downloadUpdate();
-      } catch (error) {
-        toast({
-          title: t("controlPanel.update.couldNotDownloadTitle"),
-          description: t("controlPanel.update.couldNotDownloadDescription"),
-          variant: "destructive",
-        });
-      }
-    }
-  };
-
-  const getUpdateButtonContent = () => {
-    if (isInstalling) {
-      return (
-        <>
-          <Loader2 size={14} className="animate-spin" />
-          <span>{t("controlPanel.update.installing")}</span>
-        </>
-      );
-    }
-    if (isDownloading) {
-      return (
-        <>
-          <Loader2 size={14} className="animate-spin" />
-          <span>{Math.round(downloadProgress)}%</span>
-        </>
-      );
-    }
-    if (updateStatus.updateDownloaded) {
-      return (
-        <>
-          <RefreshCw size={14} />
-          <span>{t("controlPanel.update.installButton")}</span>
-        </>
-      );
-    }
-    if (updateStatus.updateAvailable) {
-      return (
-        <>
-          <Download size={14} />
-          <span>{t("controlPanel.update.availableButton")}</span>
-        </>
-      );
-    }
-    return null;
-  };
-
   return (
     <div className="h-screen bg-background flex flex-col">
       <MeetingRecordingMount />
@@ -875,23 +767,6 @@ export default function ControlPanel({ initialSettingsSection }: ControlPanelPro
             authLoaded={authLoaded}
             isProUser={!!(usage?.isSubscribed || usage?.isTrial)}
             usageLoaded={usage?.hasLoaded ?? false}
-            updateAction={
-              !updateStatus.isDevelopment &&
-              (updateStatus.updateAvailable ||
-                updateStatus.updateDownloaded ||
-                isDownloading ||
-                isInstalling) ? (
-                <Button
-                  variant={updateStatus.updateDownloaded ? "default" : "outline"}
-                  size="sm"
-                  onClick={handleUpdateClick}
-                  disabled={isInstalling || isDownloading}
-                  className="gap-1.5 text-xs w-full h-7"
-                >
-                  {getUpdateButtonContent()}
-                </Button>
-              ) : undefined
-            }
           />
         </div>
         <main className="flex-1 flex flex-col overflow-hidden">

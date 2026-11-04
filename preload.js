@@ -362,25 +362,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("set-notification-interactivity", interactive),
   resizeMainWindow: (sizeKey) => ipcRenderer.invoke("resize-main-window", sizeKey),
 
-  // Update functions
-  checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
-  downloadUpdate: () => ipcRenderer.invoke("download-update"),
-  installUpdate: () => ipcRenderer.invoke("install-update"),
+  // App info
   getAppVersion: () => ipcRenderer.invoke("get-app-version"),
   getPostMigrationState: () => ipcRenderer.invoke("get-post-migration-state"),
   getOAuthProtocolRegistered: () => ipcRenderer.invoke("get-oauth-protocol-registered"),
   getOAuthProtocol: () => ipcRenderer.invoke("get-oauth-protocol"),
   markBundleMigrated: () => ipcRenderer.invoke("mark-bundle-migrated"),
   markBundleMigrationDismissed: () => ipcRenderer.invoke("mark-bundle-migration-dismissed"),
-  getUpdateStatus: () => ipcRenderer.invoke("get-update-status"),
-  getUpdateInfo: () => ipcRenderer.invoke("get-update-info"),
-
-  // Update event listeners
-  onUpdateAvailable: registerListener("update-available"),
-  onUpdateNotAvailable: registerListener("update-not-available"),
-  onUpdateDownloaded: registerListener("update-downloaded"),
-  onUpdateDownloadProgress: registerListener("update-download-progress"),
-  onUpdateError: registerListener("update-error"),
 
   // Audio event listeners
   onNoAudioDetected: registerListener("no-audio-detected"),
@@ -991,9 +979,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     "update-notification-data",
     (callback) => (_event, data) => callback(data)
   ),
-  getUpdateNotificationData: () => ipcRenderer.invoke("get-update-notification-data"),
-  updateNotificationReady: () => ipcRenderer.invoke("update-notification-ready"),
-  updateNotificationRespond: (action) => ipcRenderer.invoke("update-notification-respond", action),
 
   // Frost integration
   frostSetMode: (mode) => ipcRenderer.invoke("frost:setMode", mode),

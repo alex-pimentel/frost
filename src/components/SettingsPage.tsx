@@ -62,7 +62,6 @@ import { useWhisper } from "../hooks/useWhisper";
 import { usePermissions } from "../hooks/usePermissions";
 import { useSystemAudioPermission } from "../hooks/useSystemAudioPermission";
 import { useClipboard } from "../hooks/useClipboard";
-import { useUpdater } from "../hooks/useUpdater";
 
 import PromptStudio from "./ui/PromptStudio";
 import { ProviderTabs } from "./ui/ProviderTabs";
@@ -127,16 +126,9 @@ interface SettingsPageProps {
 }
 
 const UI_LANGUAGE_OPTIONS: import("./ui/LanguageSelector").LanguageOption[] = [
+  { value: "pt", label: "Português (BR)", flag: "🇧🇷" },
   { value: "en", label: "English", flag: "🇺🇸" },
   { value: "es", label: "Español", flag: "🇪🇸" },
-  { value: "fr", label: "Français", flag: "🇫🇷" },
-  { value: "de", label: "Deutsch", flag: "🇩🇪" },
-  { value: "pt", label: "Português", flag: "🇵🇹" },
-  { value: "it", label: "Italiano", flag: "🇮🇹" },
-  { value: "ru", label: "Русский", flag: "🇷🇺" },
-  { value: "ja", label: "日本語", flag: "🇯🇵" },
-  { value: "zh-CN", label: "简体中文", flag: "🇨🇳" },
-  { value: "zh-TW", label: "繁體中文", flag: "🇹🇼" },
 ];
 
 const noop = () => {};
@@ -826,24 +818,6 @@ export default function SettingsPage({
       ? "%USERPROFILE%\\.cache\\openwhispr"
       : "~/.cache/openwhispr";
 
-  const {
-    status: updateStatus,
-    info: updateInfo,
-    downloadProgress: updateDownloadProgress,
-    isChecking: checkingForUpdates,
-    isDownloading: downloadingUpdate,
-    isInstalling: installInitiated,
-    checkForUpdates,
-    downloadUpdate,
-    installUpdate: installUpdateAction,
-    getAppVersion,
-    error: updateError,
-    clearError: clearUpdateError,
-  } = useUpdater();
-
-  const isUpdateAvailable =
-    !updateStatus.isDevelopment && (updateStatus.updateAvailable || updateStatus.updateDownloaded);
-
   const migration = useMigration();
 
   const { checkWhisperInstallation } = useWhisper();
@@ -938,7 +912,6 @@ export default function SettingsPage({
     }
   }, [usage?.isApproachingLimit, usage?.wordsUsed, usage?.limit, toast, t, i18n.language]);
 
-  const installTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { registerHotkey, isRegistering: isHotkeyRegistering } = useHotkeyRegistration({
     onSuccess: (registeredHotkey) => {
@@ -1163,7 +1136,7 @@ export default function SettingsPage({
     const timer = setTimeout(async () => {
       if (!mounted) return;
 
-      const version = await getAppVersion();
+      const version = await window.electronAPI?.getAppVersion?.();
       if (version && mounted) setCurrentVersion(version);
 
       if (mounted) {
@@ -1175,7 +1148,7 @@ export default function SettingsPage({
       mounted = false;
       clearTimeout(timer);
     };
-  }, [checkWhisperInstallation, getAppVersion]);
+  }, [checkWhisperInstallation]);
 
   useEffect(() => {
     if (isUsingNativeShortcut && !supportsPushToTalk) {
@@ -1208,40 +1181,6 @@ export default function SettingsPage({
     });
     return () => cleanup?.();
   }, [toast, t, setActivationMode]);
-
-  useEffect(() => {
-    if (updateError) {
-      showAlertDialog({
-        title: t("settingsPage.general.updates.dialogs.updateError.title"),
-        description: t("settingsPage.general.updates.dialogs.updateError.description"),
-      });
-      clearUpdateError();
-    }
-  }, [updateError, showAlertDialog, clearUpdateError, t]);
-
-  useEffect(() => {
-    if (installInitiated) {
-      if (installTimeoutRef.current) {
-        clearTimeout(installTimeoutRef.current);
-      }
-      installTimeoutRef.current = setTimeout(() => {
-        showAlertDialog({
-          title: t("settingsPage.general.updates.dialogs.almostThere.title"),
-          description: t("settingsPage.general.updates.dialogs.almostThere.description"),
-        });
-      }, 10000);
-    } else if (installTimeoutRef.current) {
-      clearTimeout(installTimeoutRef.current);
-      installTimeoutRef.current = null;
-    }
-
-    return () => {
-      if (installTimeoutRef.current) {
-        clearTimeout(installTimeoutRef.current);
-        installTimeoutRef.current = null;
-      }
-    };
-  }, [installInitiated, showAlertDialog, t]);
 
   const resetAccessibilityPermissions = () => {
     const message = t("settingsPage.permissions.resetAccessibility.description");
@@ -3715,180 +3654,6 @@ EOF`,
       case "system":
         return (
           <div className="space-y-6">
-            {/* Software Updates */}
-            <div>
-              <SectionHeader title={t("settingsPage.general.updates.title")} />
-              <SettingsPanel>
-                <SettingsPanelRow>
-                  <SettingsRow
-                    label={t("settingsPage.general.updates.currentVersion")}
-                    description={
-                      updateStatus.isDevelopment
-                        ? t("settingsPage.general.updates.devMode")
-                        : isUpdateAvailable
-                          ? t("settingsPage.general.updates.newVersionAvailable")
-                          : t("settingsPage.general.updates.latestVersion")
-                    }
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="text-xs tabular-nums text-muted-foreground font-mono">
-                        {currentVersion || t("settingsPage.general.updates.versionPlaceholder")}
-                      </span>
-                      {updateStatus.isDevelopment ? (
-                        <Badge variant="warning">
-                          {t("settingsPage.general.updates.badges.dev")}
-                        </Badge>
-                      ) : isUpdateAvailable ? (
-                        <Badge variant="success">
-                          {t("settingsPage.general.updates.badges.update")}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">
-                          {t("settingsPage.general.updates.badges.latest")}
-                        </Badge>
-                      )}
-                    </div>
-                  </SettingsRow>
-                </SettingsPanelRow>
-
-                <SettingsPanelRow>
-                  <div className="space-y-2.5">
-                    <Button
-                      onClick={async () => {
-                        try {
-                          const result = await checkForUpdates();
-                          if (result && !result.updateAvailable) {
-                            toast({
-                              title: t("settingsPage.general.updates.dialogs.noUpdates.title"),
-                              description: t(
-                                "settingsPage.general.updates.dialogs.noUpdates.description"
-                              ),
-                            });
-                          }
-                        } catch {}
-                      }}
-                      disabled={checkingForUpdates || updateStatus.isDevelopment}
-                      variant="outline"
-                      className="w-full"
-                      size="sm"
-                    >
-                      <RefreshCw
-                        size={13}
-                        className={`mr-1.5 ${checkingForUpdates ? "animate-spin" : ""}`}
-                      />
-                      {checkingForUpdates
-                        ? t("settingsPage.general.updates.checking")
-                        : t("settingsPage.general.updates.checkForUpdates")}
-                    </Button>
-
-                    {isUpdateAvailable && !updateStatus.updateDownloaded && (
-                      <div className="space-y-2">
-                        <Button
-                          onClick={async () => {
-                            try {
-                              await downloadUpdate();
-                            } catch {
-                              showAlertDialog({
-                                title: t(
-                                  "settingsPage.general.updates.dialogs.downloadFailed.title"
-                                ),
-                                description: t(
-                                  "settingsPage.general.updates.dialogs.downloadFailed.description"
-                                ),
-                              });
-                            }
-                          }}
-                          disabled={downloadingUpdate}
-                          variant="success"
-                          className="w-full"
-                          size="sm"
-                        >
-                          <Download
-                            size={13}
-                            className={`mr-1.5 ${downloadingUpdate ? "animate-pulse" : ""}`}
-                          />
-                          {downloadingUpdate
-                            ? t("settingsPage.general.updates.downloading", {
-                                progress: Math.round(updateDownloadProgress),
-                              })
-                            : t("settingsPage.general.updates.downloadUpdate", {
-                                version: updateInfo?.version || "",
-                              })}
-                        </Button>
-
-                        {downloadingUpdate && (
-                          <div className="h-1 w-full overflow-hidden rounded-full bg-muted/50">
-                            <div
-                              className="h-full bg-success transition-[width] duration-200 rounded-full"
-                              style={{
-                                width: `${Math.min(100, Math.max(0, updateDownloadProgress))}%`,
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {updateStatus.updateDownloaded && (
-                      <Button
-                        onClick={() => {
-                          showConfirmDialog({
-                            title: t("settingsPage.general.updates.dialogs.installUpdate.title"),
-                            description: t(
-                              "settingsPage.general.updates.dialogs.installUpdate.description",
-                              { version: updateInfo?.version || "" }
-                            ),
-                            confirmText: t(
-                              "settingsPage.general.updates.dialogs.installUpdate.confirmText"
-                            ),
-                            onConfirm: async () => {
-                              try {
-                                await installUpdateAction();
-                              } catch {
-                                showAlertDialog({
-                                  title: t(
-                                    "settingsPage.general.updates.dialogs.installFailed.title"
-                                  ),
-                                  description: t(
-                                    "settingsPage.general.updates.dialogs.installFailed.description"
-                                  ),
-                                });
-                              }
-                            },
-                          });
-                        }}
-                        disabled={installInitiated}
-                        className="w-full"
-                        size="sm"
-                      >
-                        <RefreshCw
-                          size={14}
-                          className={`mr-2 ${installInitiated ? "animate-spin" : ""}`}
-                        />
-                        {installInitiated
-                          ? t("settingsPage.general.updates.restarting")
-                          : t("settingsPage.general.updates.installAndRestart")}
-                      </Button>
-                    )}
-                  </div>
-
-                  {updateInfo?.releaseNotes && (
-                    <div className="mt-4 pt-4 border-t border-border/30">
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-                        {t("settingsPage.general.updates.whatsNew", {
-                          version: updateInfo.version,
-                        })}
-                      </p>
-                      <div
-                        className="text-xs text-muted-foreground [&_ul]:list-disc [&_ul]:pl-4 [&_ul]:space-y-1 [&_ol]:list-decimal [&_ol]:pl-4 [&_ol]:space-y-1 [&_li]:pl-1 [&_p]:mb-2 [&_p:last-child]:mb-0 [&_a]:text-link [&_a]:underline"
-                        dangerouslySetInnerHTML={{ __html: updateInfo.releaseNotes }}
-                      />
-                    </div>
-                  )}
-                </SettingsPanelRow>
-              </SettingsPanel>
-            </div>
-
             {/* Developer Tools */}
             <div className="border-t border-border/40 pt-6">
               <DeveloperSection />

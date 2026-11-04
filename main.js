@@ -273,7 +273,6 @@ const TrayManager = require("./src/helpers/tray");
 const dockManager = require("./src/helpers/dockManager");
 const IPCHandlers = require("./src/helpers/ipcHandlers");
 const CliBridge = require("./src/helpers/cliBridge");
-const UpdateManager = require("./src/updater");
 const GlobeKeyManager = require("./src/helpers/globeKeyManager");
 const DevServerManager = require("./src/helpers/devServerManager");
 const WindowsKeyManager = require("./src/helpers/windowsKeyManager");
@@ -306,7 +305,6 @@ let frostIntegration = null;
 let parakeetManager = null;
 let diarizationManager = null;
 let trayManager = null;
-let updateManager = null;
 let globeKeyManager = null;
 let windowsKeyManager = null;
 let linuxKeyManager = null;
@@ -412,8 +410,6 @@ function initializeCoreManagers() {
   );
   windowManager.meetingDetectionEngine = meetingDetectionEngine;
   googleCalendarManager.meetingDetectionEngine = meetingDetectionEngine;
-  updateManager = new UpdateManager();
-  updateManager.setWindowManager(windowManager);
   windowsKeyManager = new WindowsKeyManager();
   linuxKeyManager = new LinuxKeyManager();
   textEditMonitor = new TextEditMonitor();
@@ -438,7 +434,6 @@ function initializeCoreManagers() {
     parakeetManager,
     diarizationManager,
     windowManager,
-    updateManager,
     windowsKeyManager,
     linuxKeyManager,
     textEditMonitor,
@@ -1179,8 +1174,6 @@ async function startApp() {
   trayManager.setCreateControlPanelCallback(() => windowManager.createControlPanelWindow());
   await trayManager.createTray();
 
-  updateManager.checkForUpdatesOnStartup();
-
   if (process.platform === "darwin") {
     const { isGlobeLikeHotkey, isMouseButtonHotkey } = require("./src/helpers/hotkeyManager");
     let globeKeyDownTime = 0;
@@ -1757,13 +1750,6 @@ if (gotSingleInstanceLock) {
   app.on("before-quit", (event) => {
     if (isShuttingDown) return;
     isShuttingDown = true;
-    if (updateManager && updateManager.isQuittingForUpdate) {
-      // Quit must proceed for the installer to run, so no preventDefault;
-      // sidecar shutdown is best-effort (the reaper cleans up orphans on relaunch).
-      performSyncTeardown();
-      sidecarRegistry.shutdownAll().catch(() => {});
-      return;
-    }
     event.preventDefault();
     performSyncTeardown();
     sidecarRegistry.shutdownAll().finally(() => app.exit(0));
@@ -1806,6 +1792,5 @@ function performSyncTeardown() {
   if (meetingAecManager) meetingAecManager.stop().catch(() => {});
   if (ipcHandlers) ipcHandlers._cleanupTextEditMonitor();
   if (textEditMonitor) textEditMonitor.stopMonitoring();
-  if (updateManager) updateManager.cleanup();
   if (frostIntegration) frostIntegration.destroy();
 }
