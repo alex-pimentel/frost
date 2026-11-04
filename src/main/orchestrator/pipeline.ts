@@ -1,3 +1,7 @@
+/**
+ * INERT: not imported by the running app. The live pipeline is
+ * `src/main/orchestrator/frostOrchestrator.js`.
+ */
 import { ThinkAgent } from './thinkAgent'
 import type { PipelineCallback } from '../../shared/types'
 

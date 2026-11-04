@@ -1,3 +1,7 @@
+/**
+ * INERT: not imported by the running app. The live system prompt is composed in
+ * `src/main/orchestrator/systemPrompt.js`.
+ */
 import { OmpBridge } from '../omp-bridge'
 import type { AgentResponse, ThinkAgentConfig, PipelineCallback, PipelineStep } from '../../shared/types'
 

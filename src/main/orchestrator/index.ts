@@ -1,3 +1,8 @@
+/**
+ * INERT: this TypeScript skeleton is not imported by the running app.
+ * The live pipeline is `src/main/orchestrator/frostOrchestrator.js` (CommonJS),
+ * wired from `src/helpers/frostIntegration.js`. Kept only as type reference.
+ */
 import { OmpBridge } from '../omp-bridge'
 import { ThinkAgent } from './thinkAgent'
 import { Pipeline } from './pipeline'

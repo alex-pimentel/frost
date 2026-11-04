@@ -1,5 +1,27 @@
 # Changelog
 
+## Orchestrator de decisão — 2026-11-04
+
+### Decision layer (live runtime, CommonJS)
+- `src/main/orchestrator/decisionEngine.js`: intenções `dictation | smalltalk | knowledge | generate | code | clarify`
+- Tools só com verbo de código ou 2+ sinais independentes — fim do "só escrever código"
+- `clarify` responde sem chamar o modelo
+- `src/main/orchestrator/wakeWord.js`: parsing de `hey frost` / `oi frost` / `frost`
+
+### Saved knowledge
+- `answerBank.js` + `answerBankStore.js`: respostas canônicas com match exato, normalizado e fuzzy
+- Persistência atômica em `userData/frost-answers.json`
+- IPC `frost:answers:list|upsert|delete` e `frost:getLastTurn`, expostos em `preload.js`
+
+### Model integration
+- `systemPrompt.js`: prompt por intenção, proíbe código não solicitado e fatos inventados
+- `src/main/chatCompletionClient.js`: cliente OpenAI-compatible extraído, com suporte a https e timeout
+- `ompBridge.prompt(text, options)` agora aceita system prompt, temperatura e timeout
+- `FrostIntegration` passa a usar o `FrostOrchestrator` real (o esqueleto TS fica marcado como inerte)
+
+### Tests
+- 62 testes em `test/orchestrator/*.test.js` (`node --test`)
+
 ## Phase 1 — 2026-07-23
 
 ### Fork and Rename

@@ -27,6 +27,23 @@ Voice (STT/TTS) → Orchestrator → Think Agent → Cactus (Needle) → omp too
 - **Chat**: Voice/type → Think Agent → Cactus → TTS
 - **Code** (v2): Full omp tool surface (LSP, DAP, workspace)
 
+## Live Orchestrator (decision layer)
+
+Runtime is **CommonJS** in `src/main/orchestrator/`, wired by
+`src/helpers/frostIntegration.js`. The TypeScript files (`index.ts`, `pipeline.ts`,
+`thinkAgent.ts`) are **INERT** — not imported by the app. Do not add features there.
+Full reference: `docs/ORCHESTRATOR.md`.
+
+```
+decide → answer bank → knowledge → generate → validate
+```
+
+- Intents: `dictation`, `smalltalk`, `knowledge`, `generate`, `code`, `clarify`.
+- Only `code` opens the tool surface, and only with a code verb or 2+ independent signals.
+- `clarify` answers without a model call (empty input, loose confirmation, short fragment).
+- The answer bank (`userData/frost-answers.json`) wins over generation for repeated questions.
+- `wakeWord.js` strips a leading wake phrase. Always-on keyword spotting does not exist yet.
+
 ## Phase 1 Status ✅ (11 commits)
 
 ### Files Created/Modified

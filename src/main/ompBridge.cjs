@@ -1,4 +1,5 @@
 const debugLogger = require("../helpers/debugLogger");
+const { createChatCompletion } = require("./chatCompletionClient");
 
 class OmpBridge {
   constructor(settings) {
@@ -39,12 +40,18 @@ class OmpBridge {
     this.settings = { ...this.settings, ...settings };
   }
 
-  async prompt(text) {
+  async prompt(text, options = {}) {
     if (this.settings.modelId) {
-      return this.promptDirect(text);
+      return this.promptDirect(text, options);
     }
     if (!this.session) {
       return { text: "No model configured. Open Settings and set up your chat provider." };
+    }
+    // The omp session owns its own prompt stack; a per-turn system prompt cannot be
+    // injected there. The direct provider path (LM Studio, llama-server, OpenAI-compatible)
+    // is the supported route for Frost's decision prompts.
+    if (options.systemPrompt) {
+      debugLogger.debug("omp session ignores per-turn system prompt; use a direct provider");
     }
     await this.session.prompt(text);
     const messages = this.session.messages || [];
@@ -52,50 +59,15 @@ class OmpBridge {
     return { text: last?.content || "", toolCalls: null, error: null };
   }
 
-  async promptDirect(text) {
-    const url = `${this.settings.providerUrl.replace(/\/+$/, "")}/chat/completions`;
-    const body = JSON.stringify({
-      model: this.settings.modelId,
-      messages: [{ role: "user", content: text }],
-      stream: false,
-    });
-    const headers = { "Content-Type": "application/json" };
-    if (this.settings.apiKey) headers["Authorization"] = `Bearer ${this.settings.apiKey}`;
-
-    try {
-      const u = new URL(url);
-      const http = require("http");
-      return new Promise((resolve) => {
-        const options = {
-          hostname: u.hostname,
-          port: u.port,
-          path: u.pathname,
-          method: "POST",
-          headers,
-          timeout: 60000,
-        };
-        const req = http.request(options, (res) => {
-          let data = "";
-          res.on("data", (chunk) => { data += chunk; });
-          res.on("end", () => {
-            try {
-              const parsed = JSON.parse(data);
-              const content = parsed?.choices?.[0]?.message?.content || "";
-              resolve({ text: content, toolCalls: null, error: null });
-            } catch {
-              resolve({ text: "", toolCalls: null, error: "Failed to parse response" });
-            }
-          });
-        });
-        req.on("error", (err) => {
-          resolve({ text: "", toolCalls: null, error: err.message });
-        });
-        req.write(body);
-        req.end();
-      });
-    } catch (err) {
-      return { text: "", toolCalls: null, error: err.message };
-    }
+  async promptDirect(text, options = {}) {
+    return createChatCompletion(
+      {
+        providerUrl: this.settings.providerUrl,
+        apiKey: this.settings.apiKey,
+        modelId: this.settings.modelId,
+      },
+      { text, ...options }
+    );
   }
 
   async destroy() {

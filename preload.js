@@ -1001,7 +1001,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   frostChat: (text) => ipcRenderer.invoke("frost:chat", text),
   frostGetSettings: () => ipcRenderer.invoke("frost:getSettings"),
   frostSaveSettings: (settings) => ipcRenderer.invoke("frost:saveSettings", settings),
-  frostListModels: (providerUrl, apiKey) => ipcRenderer.invoke("frost:listModels", providerUrl, apiKey),
+  frostListModels: (providerUrl, apiKey) =>
+    ipcRenderer.invoke("frost:listModels", providerUrl, apiKey),
+  frostGetLastTurn: () => ipcRenderer.invoke("frost:getLastTurn"),
+  frostListAnswers: () => ipcRenderer.invoke("frost:answers:list"),
+  frostUpsertAnswer: (entry) => ipcRenderer.invoke("frost:answers:upsert", entry),
+  frostDeleteAnswer: (id) => ipcRenderer.invoke("frost:answers:delete", id),
   onFrostModeChanged: registerListener(
     "frost:modeChanged",
     (callback) => (_event, mode) => callback(mode)
