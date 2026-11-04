@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Frost Forms",
+  "version": "0.1.0",
+  "description": "Preenche formulários com as respostas salvas no Frost local. Você revisa e envia.",
+  "permissions": ["storage"],
+  "host_permissions": ["http://127.0.0.1/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Frost Forms",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    }
+  ]
+}
