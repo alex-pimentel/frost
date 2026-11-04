@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-Frost is a desktop AI agent platform: a fork of OpenWhispr (Electron + React voice dictation app) with the oh-my-pi coding agent engine embedded. Combines voice I/O with multi-agent orchestration, tool calling, and RAG.
+Frost is a desktop AI agent platform: a fork of Frost (Electron + React voice dictation app) with the oh-my-pi coding agent engine embedded. Combines voice I/O with multi-agent orchestration, tool calling, and RAG.
 
 ## Tech Stack
 
@@ -23,7 +23,7 @@ Voice (STT/TTS) → Orchestrator → Think Agent → Cactus (Needle) → omp too
 - **UI**: React 19 + Tailwind v4 + shadcn/ui
 
 ### Modes
-- **Dictation**: Original OpenWhispr behavior — no agent
+- **Dictation**: Original Frost behavior — no agent
 - **Chat**: Voice/type → Think Agent → Cactus → TTS
 - **Code** (v2): Full omp tool surface (LSP, DAP, workspace)
 

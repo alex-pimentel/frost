@@ -1238,7 +1238,7 @@ declare global {
       authGetToken?: () => Promise<string | null>;
       authSetToken?: (token: string) => Promise<void>;
 
-      // OpenWhispr Cloud API
+      // Frost Cloud API
       cloudTranscribe?: (
         audioBuffer: ArrayBuffer,
         opts: { language?: string; prompt?: string; useCase?: string; diarization?: boolean }

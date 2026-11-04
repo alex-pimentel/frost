@@ -19,7 +19,7 @@ Frost é um aplicativo desktop (Electron) que combina **ditado por voz** com **a
 ## Dois Modos de Operação
 
 ### 1. Modo Dictation (padrão)
-**Herança direta do OpenWhispr.** Nada mudou.
+**Herança direta do Frost.** Nada mudou.
 
 ```
 Falar → Microfone → Whisper.cpp (STT) → texto aparece onde o cursor está
@@ -27,7 +27,7 @@ Falar → Microfone → Whisper.cpp (STT) → texto aparece onde o cursor está
 
 - Aperte o hotkey, fale, o texto é transcrito e colado
 - Sem IA, sem agente, sem processamento extra
-- Funciona exatamente como o OpenWhispr original
+- Funciona exatamente como o Frost original
 
 ### 2. Modo Chat
 **Novo no Frost.** Adiciona um agente AI entre a voz e a resposta.
@@ -76,7 +76,7 @@ React em `src/components/` + `src/App.jsx`
 ```
 App.jsx — roteia entre Dictation e Chat baseado no modo
   │
-  ├── Modo Dictation: mostra a UI original do OpenWhispr
+  ├── Modo Dictation: mostra a UI original do Frost
   │     (floating icon, overlay de gravação, etc.)
   │
   └── Modo Chat: mostra ChatModeView
@@ -156,7 +156,7 @@ C:\Users\alex_\projects\tauri_calc\
 │   ├── helpers/
 │   │   ├── frostIntegration.js    ★ Nosso código: init, IPC, lifecycle
 │   │   ├── tray.js                ★ Menu da bandeja com toggle modo
-│   │   └── ... (OpenWhispr original)
+│   │   └── ... (Frost original)
 │   │
 │   ├── components/
 │   │   ├── chat/
@@ -168,7 +168,7 @@ C:\Users\alex_\projects\tauri_calc\
 │   ├── shared/
 │   │   └── types.ts               ★ Tipos compartilhados
 │   │
-│   └── ... (OpenWhispr original)
+│   └── ... (Frost original)
 │
 ├── AGENTS.md                       ★ Memória do projeto para agentes AI
 ├── CHANGELOG.md                    ★ Histórico de mudanças
@@ -187,11 +187,11 @@ C:\Users\alex_\projects\tauri_calc\
 
 | Dependência | O que faz | Origem |
 |------------|-----------|--------|
-| **Electron 41** | Roda o app desktop | OpenWhispr |
-| **React 19** | UI | OpenWhispr |
-| **whisper.cpp** | STT local (voz → texto) | OpenWhispr |
-| **sherpa-onnx** | STT local alternativo | OpenWhispr |
-| **better-sqlite3** | Banco de dados | OpenWhispr |
+| **Electron 41** | Roda o app desktop | Frost |
+| **React 19** | UI | Frost |
+| **whisper.cpp** | STT local (voz → texto) | Frost |
+| **sherpa-onnx** | STT local alternativo | Frost |
+| **better-sqlite3** | Banco de dados | Frost |
 | **@oh-my-pi/pi-coding-agent** | Engine de agente (não usado ainda — preparado pra Phase 2) | Frost |
 | **LM Studio** | Modelo local pra chat (você já tem) | Seu setup |
 
@@ -216,9 +216,9 @@ SettingsDialog
 
 ---
 
-## O que é OpenWhispr vs Frost
+## O que é Frost vs Frost
 
-### OpenWhispr (herdado)
+### Frost (herdado)
 - Ditado por voz (whisper.cpp, sherpa-onnx)
 - Transcrição de reuniões
 - Notes com busca semântica
@@ -239,7 +239,7 @@ SettingsDialog
 
 ## Por que NÃO usamos Qdrant ainda
 
-O Qdrant é do OpenWhispr original — usado pra busca semântica nas Notes e speaker embeddings. Como não estamos usando esses recursos no Frost agora, o Qdrant baixa mas fica ocioso.
+O Qdrant é do Frost original — usado pra busca semântica nas Notes e speaker embeddings. Como não estamos usando esses recursos no Frost agora, o Qdrant baixa mas fica ocioso.
 
 Na Phase 3 (RAG), vamos substituir Qdrant por **sqlite-vec** (extensão do SQLite):
 - Sem servidor extra

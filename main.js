@@ -877,7 +877,7 @@ async function startApp() {
 
   // Electron's file:// renderer sends Origin: null, which Better Auth's
   // trustedOrigins check rejects. Spoof Origin to the request's own URL so
-  // calls to OpenWhispr's auth and API hosts are treated as same-origin.
+  // calls to Frost's auth and API hosts are treated as same-origin.
   session.defaultSession.webRequest.onBeforeSendHeaders(
     {
       urls: [

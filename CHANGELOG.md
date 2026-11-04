@@ -25,7 +25,7 @@
 ## Phase 1 — 2026-07-23
 
 ### Fork and Rename
-- Forked OpenWhispr → Frost
+- Forked Frost → Frost
 - Renamed app in package.json, electron-builder.json, main.js
 - Fixed remaining references (registerFrostProtocol, OPENWHISPR_AUTH_BRIDGE_PORT)
 

@@ -1,5 +1,5 @@
 {
-  description = "OpenWhispr – privacy-first voice dictation, meeting transcription & notes";
+  description = "Frost – privacy-first voice dictation, meeting transcription & notes";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";

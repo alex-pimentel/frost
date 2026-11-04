@@ -9,23 +9,23 @@ const DBUS_INTERFACE = "com.openwhispr.App";
 const SLOT_CONFIG = {
   dictation: {
     path: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/openwhispr/",
-    name: "OpenWhispr Toggle",
+    name: "Frost Toggle",
   },
   agent: {
     path: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/openwhispr-agent/",
-    name: "OpenWhispr Agent",
+    name: "Frost Agent",
   },
   meeting: {
     path: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/openwhispr-meeting/",
-    name: "OpenWhispr Meeting",
+    name: "Frost Meeting",
   },
   voiceAgent: {
     path: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/openwhispr-voice-agent/",
-    name: "OpenWhispr Voice Agent",
+    name: "Frost Voice Agent",
   },
   translation: {
     path: "/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/openwhispr-translation/",
-    name: "OpenWhispr Translation",
+    name: "Frost Translation",
   },
 };
 

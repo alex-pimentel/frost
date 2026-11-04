@@ -268,12 +268,12 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   );
   const useCleanupModel = useSettingsStore((s) => s.useCleanupModel);
 
-  const isOpenWhisprCloud =
+  const isFrostCloud =
     isSignedIn && cloudTranscriptionMode === "openwhispr" && !useLocalWhisper;
 
   // Mode detection
   const isSelfHosted = transcriptionMode === "self-hosted" && !useLocalWhisper;
-  const isByok = !useLocalWhisper && !isOpenWhisprCloud;
+  const isByok = !useLocalWhisper && !isFrostCloud;
 
   // Mode-aware file size validation
   // Local: no limits at all
@@ -297,7 +297,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
         requiresAccount = true;
       }
     } else {
-      // Cloud (OpenWhispr) — user is always signed in here
+      // Cloud (Frost) — user is always signed in here
       fileTooLarge = file.sizeBytes > CLOUD_PRO_MAX_FILE_SIZE;
       requiresUpgrade = !isProUser && file.sizeBytes > CLOUD_FREE_MAX_FILE_SIZE;
       isLargeFile = file.sizeBytes > CLOUD_FREE_MAX_FILE_SIZE;
@@ -337,7 +337,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   useEffect(() => {
     let cancelled = false;
     const checkProviderReady = async () => {
-      if (isOpenWhisprCloud) {
+      if (isFrostCloud) {
         setProviderReady(true);
         return;
       }
@@ -385,7 +385,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
       cancelled = true;
     };
   }, [
-    isOpenWhisprCloud,
+    isFrostCloud,
     isSelfHosted,
     remoteTranscriptionUrl,
     useLocalWhisper,
@@ -403,7 +403,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   ]);
 
   const getActiveModelLabel = (): string => {
-    if (isOpenWhisprCloud) return t("notes.upload.openwhisprCloud");
+    if (isFrostCloud) return t("notes.upload.openwhisprCloud");
     if (useLocalWhisper) {
       if (localTranscriptionProvider === "nvidia")
         return `Parakeet · ${parakeetModel || "default"}`;
@@ -445,7 +445,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
     localTranscriptionProvider: localTranscriptionProvider as string,
     whisperModel,
     parakeetModel,
-    isOpenWhisprCloud,
+    isFrostCloud,
     getApiKey: getActiveApiKey,
     cloudTranscriptionProvider: cloudTranscriptionProvider as string,
     cloudTranscriptionBaseUrl: cloudTranscriptionBaseUrl || "",
@@ -575,7 +575,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
     setProgress(0);
     setChunkProgress(null);
 
-    const useChunkProgress = isOpenWhisprCloud && isLargeFile;
+    const useChunkProgress = isFrostCloud && isLargeFile;
 
     if (useChunkProgress) {
       progressCleanupRef.current =
@@ -844,7 +844,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
   };
 
   const getTranscribingLabel = (): string => {
-    if (isOpenWhisprCloud) return t("notes.upload.transcribingCloud");
+    if (isFrostCloud) return t("notes.upload.transcribingCloud");
     if (useLocalWhisper) return t("notes.upload.transcribingLocal");
     if (isSelfHosted) {
       return t("notes.upload.transcribingProvider", {
@@ -1041,7 +1041,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
               requiresUpgrade={!!requiresUpgrade}
               fileTooLarge={fileTooLarge}
               isLargeFile={isLargeFile}
-              isOpenWhisprCloud={isOpenWhisprCloud}
+              isFrostCloud={isFrostCloud}
               byokTooLarge={byokTooLarge}
               requiresAccount={requiresAccount}
               isProUser={!!isProUser}
@@ -1191,7 +1191,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
 
             {diarizationEnabled &&
               !useLocalWhisper &&
-              !isOpenWhisprCloud &&
+              !isFrostCloud &&
               !isSelfHosted &&
               cloudTranscriptionProvider === "openai" && (
                 <p className="text-[10px] text-foreground/25 mt-1.5">
@@ -1200,7 +1200,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
               )}
             {diarizationEnabled &&
               !useLocalWhisper &&
-              !isOpenWhisprCloud &&
+              !isFrostCloud &&
               !isSelfHosted &&
               cloudTranscriptionProvider === "mistral" && (
                 <p className="text-[10px] text-foreground/25 mt-1.5">
@@ -1209,7 +1209,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
               )}
             {diarizationEnabled &&
               !useLocalWhisper &&
-              !isOpenWhisprCloud &&
+              !isFrostCloud &&
               !isSelfHosted &&
               cloudTranscriptionProvider === "groq" && (
                 <p className="text-[10px] text-amber-500/60 mt-1.5">
@@ -1223,7 +1223,7 @@ export default function UploadAudioView({ onNoteCreated, onOpenSettings }: Uploa
               </p>
             )}
 
-            {diarizationEnabled && isOpenWhisprCloud && (
+            {diarizationEnabled && isFrostCloud && (
               <p className="text-[10px] text-foreground/25 mt-1.5">
                 {t("notes.upload.diarizationRunsLocally")}
               </p>
@@ -1460,7 +1460,7 @@ interface SelectedViewProps {
   requiresUpgrade: boolean;
   fileTooLarge: boolean;
   isLargeFile: boolean;
-  isOpenWhisprCloud: boolean;
+  isFrostCloud: boolean;
   byokTooLarge: boolean;
   requiresAccount: boolean;
   isProUser: boolean;
@@ -1479,7 +1479,7 @@ function SelectedView({
   requiresUpgrade,
   fileTooLarge,
   isLargeFile,
-  isOpenWhisprCloud,
+  isFrostCloud,
   byokTooLarge,
   requiresAccount,
   isProUser,
@@ -1548,7 +1548,7 @@ function SelectedView({
       )}
 
       {/* Cloud large file info (Pro user, will be chunked) */}
-      {isLargeFile && !requiresUpgrade && !fileTooLarge && isOpenWhisprCloud && (
+      {isLargeFile && !requiresUpgrade && !fileTooLarge && isFrostCloud && (
         <p className="text-xs text-foreground/20 text-center mb-3">
           {t("notes.upload.largeFileNote")}
         </p>

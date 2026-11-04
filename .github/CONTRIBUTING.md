@@ -1,6 +1,6 @@
-# Contributing to OpenWhispr
+# Contributing to Frost
 
-Thanks for your interest in contributing. OpenWhispr is an open-source,
+Thanks for your interest in contributing. Frost is an open-source,
 privacy-first voice-to-text app, and improvements from the community —
 bug reports, fixes, docs, features — are very welcome.
 
@@ -57,4 +57,4 @@ in [`README.md`](../README.md) and
 ## Thanks
 
 Thanks for taking the time to contribute — every issue, fix, and
-improvement helps make OpenWhispr better.
+improvement helps make Frost better.

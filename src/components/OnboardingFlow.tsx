@@ -133,7 +133,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const [hotkey, setHotkey] = useState(
     () => parseHotkeyList(dictationKey)[0] || getDefaultHotkey()
   );
-  const [agentName, setAgentName] = useState("OpenWhispr");
+  const [agentName, setAgentName] = useState("Frost");
   const [skipAuth, setSkipAuth] = useState(false);
   const [isModelDownloaded, setIsModelDownloaded] = useState(false);
   const { isUsingNativeShortcut, isUsingHyprland, hyprlandConfigStatus, supportsPushToTalk } =
@@ -376,7 +376,7 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     void window.electronAPI?.markBundleMigrated?.();
 
     // Non-signed-in users in cloud mode default to BYOK to avoid
-    // "OpenWhispr Cloud requires sign-in" errors.
+    // "Frost Cloud requires sign-in" errors.
     if (!isSignedIn && !useLocalWhisper) {
       updateTranscriptionSettings({ cloudTranscriptionMode: "byok" });
     }

@@ -1,4 +1,4 @@
-// Skip OpenWhispr onboarding and auth for Frost
+// Skip Frost onboarding and auth for Frost
 localStorage.setItem("onboardingCompleted", "true");
 localStorage.setItem("authenticationSkipped", "true");
 localStorage.setItem("skipAuth", "true");

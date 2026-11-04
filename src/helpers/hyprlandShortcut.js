@@ -47,7 +47,7 @@ const VALID_HOTKEY_PATTERN =
 
 const BINDS_FILENAME = "openwhispr-binds.conf";
 const MANAGED_HEADER_LINES = [
-  "# OpenWhispr keybinds (managed automatically)",
+  "# Frost keybinds (managed automatically)",
   "# If you delete this file, also remove the matching source line from your Hyprland config.",
 ];
 
@@ -371,7 +371,7 @@ class HyprlandShortcutManager {
     }
 
     try {
-      // First unregister any existing OpenWhispr binding if the hotkey changed.
+      // First unregister any existing Frost binding if the hotkey changed.
       if (this.currentBinding && this.currentBinding !== converted.bindKey) {
         await this.unregisterKeybinding();
       }

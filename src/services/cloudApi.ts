@@ -19,7 +19,7 @@ function unavailable(): never {
   throw new CloudApiError("Cloud features are disabled in this local-only build", 503);
 }
 
-export async function cloudGet<T = unknown>(_path: string): Promise<T> {
+export async function cloudGet<T = unknown>(_path: string, _options?: unknown): Promise<T> {
   unavailable();
 }
 
@@ -31,6 +31,6 @@ export async function cloudPatch<T = unknown>(_path: string, _body?: unknown): P
   unavailable();
 }
 
-export async function cloudDelete(_path: string): Promise<void> {
+export async function cloudDelete<T = void>(_path: string, _options?: unknown): Promise<T> {
   unavailable();
 }

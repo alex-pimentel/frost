@@ -51,7 +51,7 @@ export default function FinishStep({
   const startWithCorti = () => {
     // Transcription always routes to Corti. Reasoning routes to Corti only in the
     // EU with an API key (Corti Models is EU-only); otherwise the HIPAA-compliant
-    // OpenWhispr Cloud handles language features so PHI never reaches a third party.
+    // Frost Cloud handles language features so PHI never reaches a third party.
     const reasoningProvider = modelRegistry.getCloudProviders().find((p) => p.id === "corti");
     const { transcription, reasoning } = buildCortiOnboardingPayloads(
       cortiProvider,
@@ -133,7 +133,7 @@ export default function FinishStep({
               {t("onboarding.finish.corti.regionHint")}
             </p>
           </div>
-          {/* Corti Models (LLM) is EU-only; US projects use OpenWhispr Cloud for
+          {/* Corti Models (LLM) is EU-only; US projects use Frost Cloud for
               language features, so the key is only collected in the EU region. */}
           {cortiEnvironment === "eu" && (
             <div className="space-y-1.5">

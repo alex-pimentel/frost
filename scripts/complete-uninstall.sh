@@ -4,7 +4,7 @@ set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-echo "This script will stop OpenWhispr, remove the installed app, and delete caches, databases, and preferences."
+echo "This script will stop Frost, remove the installed app, and delete caches, databases, and preferences."
 read -r -p "Continue with the full uninstall? [y/N]: " confirm
 if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
   echo "Aborted."
@@ -19,35 +19,35 @@ remove_target() {
   fi
 }
 
-echo "Stopping running OpenWhispr/Electron processes..."
-pkill -f "OpenWhispr" 2>/dev/null || true
+echo "Stopping running Frost/Electron processes..."
+pkill -f "Frost" 2>/dev/null || true
 pkill -f "open-whispr" 2>/dev/null || true
-pkill -f "Electron Helper.*OpenWhispr" 2>/dev/null || true
+pkill -f "Electron Helper.*Frost" 2>/dev/null || true
 
-echo "Removing /Applications/OpenWhispr.app (requires admin)..."
-remove_target "/Applications/OpenWhispr.app"
+echo "Removing /Applications/Frost.app (requires admin)..."
+remove_target "/Applications/Frost.app"
 
 echo "Purging Application Support data..."
-remove_target "$HOME/Library/Application Support/OpenWhispr"
+remove_target "$HOME/Library/Application Support/Frost"
 remove_target "$HOME/Library/Application Support/open-whispr"
-remove_target "$HOME/Library/Application Support/OpenWhispr-dev"
+remove_target "$HOME/Library/Application Support/Frost-dev"
 remove_target "$HOME/Library/Application Support/com.openwhispr"
-remove_target "$HOME/Library/Application Support/com.openwhispr.OpenWhispr"
+remove_target "$HOME/Library/Application Support/com.openwhispr.Frost"
 
 echo "Removing caches, logs, and saved state..."
 remove_target "$HOME/Library/Caches/open-whispr"
-remove_target "$HOME/Library/Caches/com.openwhispr.OpenWhispr"
-remove_target "$HOME/Library/Preferences/com.openwhispr.OpenWhispr.plist"
+remove_target "$HOME/Library/Caches/com.openwhispr.Frost"
+remove_target "$HOME/Library/Preferences/com.openwhispr.Frost.plist"
 remove_target "$HOME/Library/Preferences/com.openwhispr.helper.plist"
-remove_target "$HOME/Library/Logs/OpenWhispr"
-remove_target "$HOME/Library/Saved Application State/com.openwhispr.OpenWhispr.savedState"
+remove_target "$HOME/Library/Logs/Frost"
+remove_target "$HOME/Library/Saved Application State/com.openwhispr.Frost.savedState"
 
 echo "Cleaning temporary files..."
 shopt -s nullglob
 for tmp in /tmp/openwhispr*; do
   remove_target "$tmp"
 done
-for crash in "$HOME/Library/Application Support/CrashReporter"/OpenWhispr_*; do
+for crash in "$HOME/Library/Application Support/CrashReporter"/Frost_*; do
   remove_target "$crash"
 done
 shopt -u nullglob
@@ -56,7 +56,7 @@ read -r -p "Remove downloaded Whisper models and caches (~/.cache/whisper, ~/Lib
 if [[ "$wipe_models" =~ ^[Yy]$ ]]; then
   remove_target "$HOME/.cache/whisper"
   remove_target "$HOME/Library/Application Support/whisper"
-  remove_target "$HOME/Library/Application Support/OpenWhispr/models"
+  remove_target "$HOME/Library/Application Support/Frost/models"
 fi
 
 ENV_FILE="$PROJECT_ROOT/.env"

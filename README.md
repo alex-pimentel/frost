@@ -17,11 +17,11 @@
 
 ---
 
-Frost is a desktop AI agent combining voice dictation with AI-powered agent orchestration. Fork of OpenWhispr with the oh-my-pi coding agent engine embedded.
+Frost is a desktop AI agent combining voice dictation with AI-powered agent orchestration. Fork of Frost with the oh-my-pi coding agent engine embedded.
 
 **Chat mode**: Talk or type — input routes through a Think Agent (any model via omp's 40+ providers) with optional tool calling via Cactus (Needle 26M), then responds via TTS.
 
-**Dictation mode**: Original OpenWhispr behavior — press a hotkey, speak, text appears at cursor.
+**Dictation mode**: Original Frost behavior — press a hotkey, speak, text appears at cursor.
 
 ## Features
 

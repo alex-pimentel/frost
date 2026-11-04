@@ -8,7 +8,7 @@
 ; scoped inbound BLOCK rule suppresses the prompt and closes the port to the
 ; network; loopback is never filtered, so transcription is unaffected.
 ; netsh needs elevation — per-user installs skip this silently.
-!define SHERPA_FIREWALL_RULE "OpenWhispr Local Transcription Server (sherpa-onnx)"
+!define SHERPA_FIREWALL_RULE "Frost Local Transcription Server (sherpa-onnx)"
 
 !macro customInstall
   nsExec::ExecToLog 'netsh advfirewall firewall delete rule name="${SHERPA_FIREWALL_RULE}"'
@@ -21,7 +21,7 @@
     StrCpy $0 "$PROFILE\.cache\openwhispr\models"
     IfFileExists "$0\*.*" 0 +3
       RMDir /r "$0"
-      DetailPrint "Removed OpenWhispr cached models"
+      DetailPrint "Removed Frost cached models"
     StrCpy $1 "$PROFILE\.cache\openwhispr"
     RMDir "$1"
   ${endIf}
