@@ -83,5 +83,6 @@ Grava e persiste em `userData/frost-answers.json` (`persistAnswerBank`).
 | `src/main/forms/formMatcher.js` | pronto, 9 testes |
 | Rotas `/v1/forms/*` no bridge | prontas |
 | Persistência das respostas | pronta |
-| Extensão MV3 (content script + painel) | **não iniciada** |
+| Extensão MV3 (content script + painel) | pronta (`extensions/frost-forms`) |
+| Salvar resposta pela página | pronto (painel → "Salvar no banco") |
 | Integração com o orquestrador (pergunta aberta → LLM com evidência) | não iniciada |

@@ -75,3 +75,4 @@ precisa vir acompanhada da atualização deste arquivo.
 | Modelo de decisão real | harness e sidecar prontos; falta instalar o modelo e rotular dados |
 | Automação de navegador | não iniciada — extensão + decisão/humano no envio |
 | Ícone 16px | silhueta; precisaria arte dedicada para tamanhos mínimos |
+| Extensão sem teste automatizado | validada por revisão e uso, não por teste de navegador |

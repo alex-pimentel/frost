@@ -323,6 +323,32 @@ class TrayManager {
       },
       { type: "separator" },
       {
+        label: "Copiar credenciais da extensão",
+        click: () => {
+          try {
+            const fs = require("fs");
+            const os = require("os");
+            const path = require("path");
+            const { clipboard } = require("electron");
+
+            // Same discovery file the CLI bridge writes (see helpers/cliBridge.js).
+            const file = path.join(os.homedir(), ".openwhispr", "cli-bridge.json");
+            const bridge = JSON.parse(fs.readFileSync(file, "utf-8"));
+            clipboard.writeText(`porta: ${bridge.port}\ntoken: ${bridge.token}`);
+
+            if (process.platform === "win32" && this.tray?.displayBalloon) {
+              this.tray.displayBalloon({
+                title: "Frost",
+                content: `Porta ${bridge.port} e token copiados para a área de transferência.`,
+              });
+            }
+            debugLogger.info("Bridge credentials copied to clipboard", { port: bridge.port }, "tray");
+          } catch (err) {
+            debugLogger.warn("Could not read the bridge credentials", { error: err.message }, "tray");
+          }
+        },
+      },
+      {
         label: i18nMain.t("tray.quit"),
         click: () => {
           debugLogger.info("Quitting app via tray menu", undefined, "tray");

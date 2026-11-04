@@ -11,7 +11,10 @@ Ela preenche; **quem envia é você**.
 
 ## Conectar ao Frost
 
-O bridge local escreve a porta e o token em:
+**Atalho:** clique com o botão direito no ícone do Frost na bandeja → **Copiar
+credenciais da extensão**. Porta e token vão para a área de transferência.
+
+Alternativa manual — o bridge local escreve os dois valores em:
 
 ```
 %USERPROFILE%\.openwhispr\cli-bridge.json
@@ -23,7 +26,8 @@ O bridge local escreve a porta e o token em:
 
 Copie os dois valores para a tela de configuração e use **Testar conexão**.
 
-> O token é gerado a cada inicialização do app. Se o Frost reiniciar, copie o novo.
+> O token é gerado a cada inicialização do app. Se o Frost reiniciar, use o item do
+> tray novamente.
 
 ## Usar
 
@@ -31,7 +35,9 @@ Copie os dois valores para a tela de configuração e use **Testar conexão**.
 2. No painel do canto inferior direito, clique em **Buscar respostas**
 3. O painel mostra o que casou (com confiança) e o que precisa de revisão
 4. **Preencher** aplica só as respostas encontradas
-5. Revise e envie você mesmo
+5. Nos campos marcados **revisar**, escreva a resposta e clique em **Salvar no banco** —
+   ela fica disponível para as próximas vagas
+6. Revise e envie você mesmo
 
 ## O que ela nunca faz
 
@@ -69,7 +75,7 @@ setter nativo + eventos `input`/`change`/`blur`, porque React/Vue ignoram
 |---|---|
 | Detecção de campos + painel + preenchimento | implementado |
 | Configuração (porta/token) + teste de conexão | implementado |
-| Salvar resposta nova direto da página | **não implementado** (a rota existe) |
+| Salvar resposta nova direto da página | implementado (textarea + "Salvar no banco") |
 | Teste automatizado no navegador | **não existe** — validado por revisão e uso |
 
 O contrato completo está em `docs/FORMS.md`.

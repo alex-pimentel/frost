@@ -33,7 +33,10 @@ const STYLE = `
   .meta { color: #7ba0bf; font-size: 11px; }
   .status { color: #7ba0bf; }
   .status.error { color: #b4453a; }
-  textarea { width: 100%; min-height: 56px; font: inherit; border-radius: 8px; border: 1px solid #c7dff3; padding: 6px; resize: vertical; }
+  textarea { width: 100%; min-height: 48px; font: inherit; border-radius: 8px; border: 1px solid #c7dff3; padding: 6px; resize: vertical; box-sizing: border-box; }
+  .teach { display: grid; gap: 6px; margin-top: 6px; }
+  .teach .hint { font-size: 11px; color: #8ba9c2; }
+  .saved { color: #2f7d4f; }
 `;
 
 const SKIP_TYPES = new Set(["file", "password", "hidden", "submit", "button", "image", "reset"]);
@@ -127,6 +130,17 @@ function fillField(element, value) {
   return true;
 }
 
+/** Stable id so teaching the same field twice updates the same answer. */
+function answerId(label) {
+  return String(label ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 60) || "resposta";
+}
+
 function createPanel() {
   const host = document.createElement("div");
   host.style.all = "initial";
@@ -205,8 +219,64 @@ function createPanel() {
       meta.textContent = `${match.reason} · ${(match.confidence * 100).toFixed(0)}%`;
 
       row.append(label, value, meta);
+
+      if (match.needsReview) {
+        const teach = document.createElement("div");
+        teach.className = "teach";
+
+        const input = document.createElement("textarea");
+        input.placeholder = "Resposta para este campo";
+        input.dataset.role = "answer";
+
+        const save = document.createElement("button");
+        save.dataset.action = "save";
+        save.dataset.index = String(match.index);
+        save.textContent = "Salvar no banco";
+
+        teach.append(input, save);
+        row.appendChild(teach);
+      }
+
+      row.dataset.index = String(match.index);
       results.appendChild(row);
     });
+  };
+
+  const handleSave = async (index, button) => {
+    const row = button.closest(".row");
+    const input = row?.querySelector('[data-role="answer"]');
+    const match = matches[index];
+    const answer = input?.value?.trim();
+
+    if (!match) return;
+    if (!answer) {
+      setStatus("Escreva a resposta antes de salvar.", true);
+      return;
+    }
+
+    button.disabled = true;
+    const response = await send({
+      type: "saveAnswer",
+      entry: {
+        id: answerId(match.label),
+        question: match.label,
+        answer,
+      },
+    });
+    button.disabled = false;
+
+    if (!response.ok) {
+      setStatus(response.error, true);
+      return;
+    }
+
+    match.answer = answer;
+    match.needsReview = false;
+    match.reason = "saved";
+    input.value = "";
+    button.textContent = "Salvo ✓";
+    button.classList.add("saved");
+    setStatus("Resposta salva no Frost.");
   };
 
   const handleMatch = async () => {
@@ -261,6 +331,10 @@ function createPanel() {
     if (action === "close") host.remove();
     if (action === "match") handleMatch();
     if (action === "fill") handleFill();
+    if (action === "save") {
+      const index = Number(event.target.dataset.index);
+      handleSave(index, event.target);
+    }
   });
 
   buttons.forEach((button) => button.addEventListener("mouseup", (event) => event.stopPropagation()));
