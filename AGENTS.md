@@ -134,3 +134,12 @@ npm run build      # Production build
 npx vitest run    # Run tests
 cd src && npx vite build  # Just renderer build
 ```
+
+### Windows build from WSL
+
+`./scripts/cross-build-windows.sh` produces the Windows installers from Linux. It
+exists because the naive path silently ships Linux native modules: `@electron/rebuild`
+downloads the host-platform prebuild for `better-sqlite3`, and the NSIS step needs Wine.
+The script swaps the three platform-specific binaries, downloads the win32 resources
+with `TARGET_PLATFORM=win32`, compiles the key listener with mingw and runs
+electron-builder inside `electronuserland/builder:wine`.
