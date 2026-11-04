@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import logoIcon from "../assets/logo.svg";
+import logoIcon from "../assets/mascot-face.png";
 
 interface MeetingNotificationCardProps {
   title: string;

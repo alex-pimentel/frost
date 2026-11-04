@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import { CopyableCommand } from "./ui/CopyableCommand";
 import { LogoTile } from "./ui/LogoTile";
 import { useToast } from "./ui/useToast";
-import logo from "../assets/logo.svg";
+import logo from "../assets/mascot-face.png";
 
 const CLI_DOCS_URL = "https://docs.openwhispr.com/cli/install";
 const INSTALL_CMD = "npm install -g @openwhispr/cli";

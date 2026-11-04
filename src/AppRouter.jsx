@@ -6,7 +6,7 @@ import TranscriptionPreviewOverlay from "./components/TranscriptionPreviewOverla
 import WindowControls from "./components/WindowControls.tsx";
 import { Card, CardContent } from "./components/ui/card.tsx";
 import { useTheme } from "./hooks/useTheme";
-import logoIcon from "./assets/logo.svg";
+import logoIcon from "./assets/mascot-face.png";
 
 const ControlPanel = React.lazy(() => import("./components/ControlPanel.tsx"));
 const OnboardingFlow = React.lazy(() => import("./components/OnboardingFlow.tsx"));

@@ -1,13 +1,19 @@
 #!/usr/bin/env node
 /**
- * Regenerates the app icons from src/assets/logo.svg.
+ * Regenerates the app icons from src/assets/mascot.png.
+ *
+ * Two rendering strategies, because one artwork cannot do both jobs:
+ *  - large sizes (>=64px) use the full square artwork;
+ *  - small sizes (<=48px) use a tighter crop around the face, otherwise the fox
+ *    turns into an unreadable white blob in the taskbar.
  *
  * The Windows target needs a real multi-resolution .ico (electron-builder embeds it
  * into the exe). sharp cannot write ICO, so the container format is assembled by
  * hand: ICO allows PNG-compressed entries, which is what modern Windows expects.
  *
  * Usage: node scripts/build-icons.js
- * Output: src/assets/icon.png (1024), src/assets/icon.ico (16…256)
+ * Output: src/assets/icon.png (1024), src/assets/icon.ico (16…256),
+ *         src/assets/mascot-face.png (512, cropped for in-app use)
  *
  * macOS (`icon.icns`) is left untouched: regenerating it needs Apple tooling.
  */
@@ -17,13 +23,31 @@ const path = require("path");
 const sharp = require("sharp");
 
 const ROOT = path.resolve(__dirname, "..");
-const SOURCE = path.join(ROOT, "src/assets/logo.svg");
+const SOURCE = path.join(ROOT, "src/assets/mascot.png");
 const PNG_OUT = path.join(ROOT, "src/assets/icon.png");
 const ICO_OUT = path.join(ROOT, "src/assets/icon.ico");
-const ICO_SIZES = [16, 24, 32, 48, 64, 128, 256];
+const FACE_OUT = path.join(ROOT, "src/assets/mascot-face.png");
 
-async function render(svg, size) {
-  return sharp(svg, { density: 384 }).resize(size, size, { fit: "contain" }).png().toBuffer();
+const ICO_SIZES = [16, 24, 32, 48, 64, 128, 256];
+/** Face crop, as a fraction of the source: trims the ears' outer edge and chin. */
+const FACE_CROP = { left: 0.16, top: 0.14, width: 0.68, height: 0.68 };
+
+function faceRegion(width, height) {
+  return {
+    left: Math.round(width * FACE_CROP.left),
+    top: Math.round(height * FACE_CROP.top),
+    width: Math.round(width * FACE_CROP.width),
+    height: Math.round(height * FACE_CROP.height),
+  };
+}
+
+async function render(source, size, { cropped }) {
+  let pipeline = sharp(source);
+  if (cropped) {
+    const meta = await sharp(source).metadata();
+    pipeline = pipeline.extract(faceRegion(meta.width, meta.height));
+  }
+  return pipeline.resize(size, size, { fit: "cover" }).png().toBuffer();
 }
 
 function packIco(entries) {
@@ -53,21 +77,30 @@ function packIco(entries) {
 
 async function main() {
   if (!fs.existsSync(SOURCE)) throw new Error(`missing ${SOURCE}`);
-  const svg = fs.readFileSync(SOURCE);
 
-  await sharp(svg, { density: 384 }).resize(1024, 1024).png().toFile(PNG_OUT);
-  console.log(`icon.png   1024x1024  ${(fs.statSync(PNG_OUT).size / 1024).toFixed(1)} KB`);
+  await sharp(SOURCE)
+    .resize(1024, 1024, { fit: "cover" })
+    .png({ compressionLevel: 9, effort: 10 })
+    .toFile(PNG_OUT);
+  console.log(`icon.png        1024x1024  ${(fs.statSync(PNG_OUT).size / 1024).toFixed(1)} KB`);
+
+  const meta = await sharp(SOURCE).metadata();
+  await sharp(SOURCE)
+    .extract(faceRegion(meta.width, meta.height))
+    .resize(256, 256, { fit: "cover" })
+    .png({ compressionLevel: 9, effort: 10 })
+    .toFile(FACE_OUT);
+  console.log(`mascot-face.png 256x256    ${(fs.statSync(FACE_OUT).size / 1024).toFixed(1)} KB`);
 
   const entries = [];
   for (const size of ICO_SIZES) {
-    entries.push({ size, data: await render(svg, size) });
+    entries.push({ size, data: await render(SOURCE, size, { cropped: size <= 48 }) });
   }
   fs.writeFileSync(ICO_OUT, packIco(entries));
   console.log(
-    `icon.ico   ${ICO_SIZES.join("/")}  ${(fs.statSync(ICO_OUT).size / 1024).toFixed(1)} KB`
+    `icon.ico        ${ICO_SIZES.join("/")}  ${(fs.statSync(ICO_OUT).size / 1024).toFixed(1)} KB`
   );
 
-  // sanity check: header must declare an icon with the expected entry count
   const written = fs.readFileSync(ICO_OUT);
   const count = written.readUInt16LE(4);
   if (count !== ICO_SIZES.length) {
