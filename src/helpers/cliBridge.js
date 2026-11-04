@@ -5,6 +5,7 @@ const path = require("path");
 const crypto = require("crypto");
 const debugLogger = require("./debugLogger");
 const { isPortAvailable } = require("../utils/serverUtils");
+const { matchFields } = require("../main/forms/formMatcher");
 
 const PORT_RANGE_START = 8200;
 const PORT_RANGE_END = 8219;
@@ -279,6 +280,47 @@ class CliBridge {
         const notes = db.getNotes(noteType, limit, folderId);
         return { data: notes, has_more: false, next_cursor: null };
       }),
+      exact("POST", "/v1/forms/match", ({ body }) => {
+        const bank = ipc.frost?.answerBank;
+        if (!bank) {
+          const err = new Error("Answer bank is not ready");
+          err.code = "UNAVAILABLE";
+          throw err;
+        }
+        const fields = Array.isArray(body?.fields) ? body.fields : [];
+        const result = matchFields({ fields, bank });
+        return { data: result.matches, stats: result.stats };
+      }),
+      exact("GET", "/v1/forms/answers", () => {
+        const bank = ipc.frost?.answerBank;
+        if (!bank) {
+          const err = new Error("Answer bank is not ready");
+          err.code = "UNAVAILABLE";
+          throw err;
+        }
+        return { data: bank.toJSON().entries };
+      }),
+      exact(
+        "POST",
+        "/v1/forms/answers",
+        ({ body }) => {
+          const bank = ipc.frost?.answerBank;
+          if (!bank) {
+            const err = new Error("Answer bank is not ready");
+            err.code = "UNAVAILABLE";
+            throw err;
+          }
+          if (!body?.id || !body?.answer) {
+            const err = new Error("id and answer are required");
+            err.code = "VALIDATION";
+            throw err;
+          }
+          const entry = bank.add(body);
+          ipc.frost?.persistAnswerBank?.();
+          return { data: entry };
+        },
+        201
+      ),
       exact("GET", "/v1/notes/search", ({ query }) => {
         const q = query.get("q") || "";
         if (!q.trim()) {

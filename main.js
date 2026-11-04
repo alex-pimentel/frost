@@ -1164,10 +1164,12 @@ async function startApp() {
 
   const { FrostIntegration } = require("./src/helpers/frostIntegration");
   frostIntegration = new FrostIntegration();
-  frostIntegration.initialize().catch((err) => {
+  frostIntegration.initialize({ databaseManager }).catch((err) => {
     debugLogger.debug("Frost integration init error (non-fatal)", { error: err.message });
   });
 
+  // The local bridge needs the answer bank to serve form requests.
+  ipcHandlers.frost = frostIntegration;
   trayManager.setFrostIntegration(frostIntegration);
   trayManager.setWindows(windowManager.mainWindow, windowManager.controlPanelWindow);
   trayManager.setWindowManager(windowManager);

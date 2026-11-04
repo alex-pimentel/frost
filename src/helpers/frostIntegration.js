@@ -6,6 +6,9 @@ const debugLogger = require("./debugLogger");
 const { FrostOrchestrator } = require("../main/orchestrator/frostOrchestrator");
 const { loadAnswerBank, saveAnswerBank } = require("../main/orchestrator/answerBankStore");
 const { DecisionModel } = require("../main/orchestrator/decisionModel");
+const {
+  createNoteKnowledgeProvider,
+} = require("../main/orchestrator/noteKnowledgeProvider");
 
 const SETTINGS_FILE = "frost-settings.json";
 const ANSWER_BANK_FILE = "frost-answers.json";
@@ -45,15 +48,22 @@ class FrostIntegration {
     this.ompBridge = null;
     this.orchestrator = null;
     this.answerBank = null;
+    this.knowledgeProvider = null;
     this.decisionModel = null;
     this.settings = null;
     this.lastTurn = null;
   }
 
-  async initialize() {
+  async initialize(deps = {}) {
     if (this.initialized) return;
     try {
       this.settings = loadSettings();
+
+      // Retrieval over the local notes index: lexical (FTS5), instant, offline.
+      this.knowledgeProvider = createNoteKnowledgeProvider({
+        databaseManager: deps.databaseManager,
+        logger: debugLogger,
+      });
       this.answerBank = loadAnswerBank(getAnswerBankPath());
 
       const { OmpBridge } = require("../main/ompBridge.cjs");
@@ -74,6 +84,7 @@ class FrostIntegration {
       this.orchestrator = new FrostOrchestrator({
         bridge: this.ompBridge,
         answerBank: this.answerBank,
+        knowledgeProvider: this.knowledgeProvider,
         decisionModel: this.decisionModel,
         logger: debugLogger,
         mode: this.mode,
@@ -191,6 +202,18 @@ class FrostIntegration {
         req.end();
       });
     });
+  }
+
+  /** Persists the answer bank after an external mutation (e.g. a form request). */
+  persistAnswerBank() {
+    if (!this.answerBank) return false;
+    try {
+      saveAnswerBank(getAnswerBankPath(), this.answerBank);
+      return true;
+    } catch (err) {
+      debugLogger.warn("Failed to persist answer bank", { error: err.message });
+      return false;
+    }
   }
 
   async destroy() {
