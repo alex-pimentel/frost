@@ -24,8 +24,6 @@ import googleCalendarIcon from "../assets/icons/google-calendar.svg";
 const API_DOCS_URL = "https://docs.openwhispr.com/api/overview";
 
 interface IntegrationsViewProps {
-  isPaid: boolean;
-  onUpgrade: () => void;
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
@@ -36,7 +34,7 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function IntegrationsView({ isPaid, onUpgrade }: IntegrationsViewProps) {
+export default function IntegrationsView({}: IntegrationsViewProps) {
   const { t } = useTranslation();
   const { gcalAccounts, setGcalAccounts, gcalPrimaryOnly, setGcalPrimaryOnly } = useSettingsStore();
   const [isConnecting, setIsConnecting] = useState(false);
@@ -228,23 +226,17 @@ export default function IntegrationsView({ isPaid, onUpgrade }: IntegrationsView
                   {t("integrations.api.title")}
                 </p>
                 <p className="text-xs text-muted-foreground/70 mt-0.5 leading-relaxed">
-                  {isPaid ? t("integrations.api.description") : t("integrations.api.proRequired")}
+                  {t("integrations.api.description")}
                 </p>
               </div>
-              {isPaid ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setApiKeysDialogOpen(true)}
-                  className="shrink-0"
-                >
-                  {t("integrations.api.manage")}
-                </Button>
-              ) : (
-                <Button size="sm" onClick={onUpgrade} className="shrink-0">
-                  {t("integrations.api.viewPlans")}
-                </Button>
-              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setApiKeysDialogOpen(true)}
+                className="shrink-0"
+              >
+                {t("integrations.api.manage")}
+              </Button>
             </div>
           </SettingsPanelRow>
         </SettingsPanel>
@@ -252,12 +244,12 @@ export default function IntegrationsView({ isPaid, onUpgrade }: IntegrationsView
 
       <div>
         <SectionLabel>{t("integrations.sections.mcp")}</SectionLabel>
-        <McpIntegrationCard isPaid={isPaid} onUpgrade={onUpgrade} />
+        <McpIntegrationCard isPaid={true} onUpgrade={() => {}} />
       </div>
 
       <div>
         <SectionLabel>{t("integrations.sections.cli")}</SectionLabel>
-        <CliIntegrationCard isPaid={isPaid} onUpgrade={onUpgrade} />
+        <CliIntegrationCard isPaid={true} onUpgrade={() => {}} />
       </div>
 
       {!hasAccounts && (

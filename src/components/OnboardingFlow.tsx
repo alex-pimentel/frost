@@ -30,8 +30,6 @@ import { useSystemAudioPermission } from "../hooks/useSystemAudioPermission";
 import { useSettings } from "../hooks/useSettings";
 import { useSettingsStore } from "../stores/settingsStore";
 import LanguageSelector from "./ui/LanguageSelector";
-import AuthenticationStep from "./AuthenticationStep";
-import EmailVerificationStep from "./EmailVerificationStep";
 import { setAgentName as saveAgentName } from "../utils/agentName";
 import {
   formatHotkeyLabel,
@@ -41,7 +39,6 @@ import {
   parseHotkeyList,
   serializeHotkeyList,
 } from "../utils/hotkeys";
-import { useAuth } from "../hooks/useAuth";
 import { HotkeyInput } from "./ui/HotkeyInput";
 import { useHotkeyRegistration } from "../hooks/useHotkeyRegistration";
 import { useHotkeyModeInfo } from "../hooks/useHotkeyModeInfo";
@@ -68,9 +65,11 @@ interface OnboardingFlowProps {
   onComplete: (options?: { openSettings?: boolean }) => void;
 }
 
+// Frost is local-only: there is no account to sign into.
+const isSignedIn = false;
+
 export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const { t } = useTranslation();
-  const { isSignedIn } = useAuth();
 
   const [currentStep, setCurrentStep, removeCurrentStep] = useLocalStorage(
     "onboardingCurrentStep",
@@ -136,7 +135,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   );
   const [agentName, setAgentName] = useState("OpenWhispr");
   const [skipAuth, setSkipAuth] = useState(false);
-  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null);
   const [isModelDownloaded, setIsModelDownloaded] = useState(false);
   const { isUsingNativeShortcut, isUsingHyprland, hyprlandConfigStatus, supportsPushToTalk } =
     useHotkeyModeInfo("onboarding");
@@ -206,7 +204,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const steps = useMemo(() => {
     const list = [
-      { id: "welcome", title: t("onboarding.steps.welcome"), icon: UserCircle },
       { id: "usecase", title: t("onboarding.steps.useCase"), icon: Sparkles },
       { id: "setup", title: t("onboarding.steps.setup"), icon: Settings },
     ];
@@ -519,34 +516,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const renderStep = () => {
     switch (currentStepId) {
-      case "welcome":
-        if (pendingVerificationEmail) {
-          return (
-            <EmailVerificationStep
-              email={pendingVerificationEmail}
-              onVerified={() => {
-                setPendingVerificationEmail(null);
-                nextStep();
-              }}
-              onBack={() => setPendingVerificationEmail(null)}
-            />
-          );
-        }
-        return (
-          <AuthenticationStep
-            onContinueWithoutAccount={() => {
-              setSkipAuth(true);
-              nextStep();
-            }}
-            onAuthComplete={() => {
-              nextStep();
-            }}
-            onNeedsVerification={(email) => {
-              setPendingVerificationEmail(email);
-            }}
-          />
-        );
-
       case "usecase":
         return (
           <UseCaseStep
@@ -896,8 +865,6 @@ export default function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
 
   const canProceed = () => {
     switch (currentStepId) {
-      case "welcome":
-        return isSignedIn || skipAuth;
       case "usecase":
         return true; // Selection is optional — Next doubles as skip
       case "setup":
