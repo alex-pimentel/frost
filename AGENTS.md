@@ -27,6 +27,17 @@ Voice (STT/TTS) → Orchestrator → Think Agent → Cactus (Needle) → omp too
 - **Chat**: Voice/type → Think Agent → Cactus → TTS
 - **Code** (v2): Full omp tool surface (LSP, DAP, workspace)
 
+## Product premises
+
+`docs/PRINCIPLES.md` is the agreement record: local-only and offline after setup, no
+accounts, no cloud sync, no auto-updater, three languages (pt/es/en), local
+workspaces without members or billing, rules-first decisions with a statistical model
+as a signal in shadow mode, and the packaging rule that every bundled binary must be
+PE32+.
+
+Read it before changing scope: if a change contradicts an item there, the change has
+to update that file too.
+
 ## Live Orchestrator (decision layer)
 
 Runtime is **CommonJS** in `src/main/orchestrator/`, wired by
