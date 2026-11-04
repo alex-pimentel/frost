@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Sliders, Mic, Brain, Wrench, Keyboard, Shield } from "lucide-react";
+import { Sliders, Mic, Brain, Wrench, Keyboard, Shield, Users } from "lucide-react";
 import SidebarModal, { type SidebarItem } from "./ui/SidebarModal";
 import SettingsPage, { SettingsSectionType } from "./SettingsPage";
 
@@ -45,6 +45,13 @@ export default function SettingsModal({ open, onOpenChange, initialSection }: Se
   const { t } = useTranslation();
   const sidebarItems: SidebarItem<SettingsSectionType>[] = useMemo(
     () => [
+      {
+        id: "workspace",
+        label: t("settingsModal.sections.workspace.label"),
+        icon: Users,
+        description: t("settingsModal.sections.workspace.description"),
+        group: t("settingsModal.groups.account"),
+      },
       {
         id: "general",
         label: t("settingsModal.sections.general.label"),

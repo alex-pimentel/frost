@@ -1,7 +1,6 @@
 import { create } from "zustand";
-import type { Workspace, WorkspaceMember, Team } from "../types/electron";
+import type { Workspace } from "../types/electron";
 import { WorkspacesService } from "../services/WorkspacesService";
-import { TeamsService } from "../services/TeamsService";
 import logger from "../utils/logger";
 
 interface WorkspaceState {
@@ -9,14 +8,12 @@ interface WorkspaceState {
   loaded: boolean;
   loading: boolean;
   activeWorkspaceId: string | null;
-  members: WorkspaceMember[];
-  teams: Team[];
 
   setActiveWorkspaceId: (id: string | null) => void;
   refresh: () => Promise<void>;
   createWorkspace: (name: string) => Promise<Workspace>;
-  refreshMembers: (workspaceId: string) => Promise<void>;
-  refreshTeams: (workspaceId: string) => Promise<void>;
+  renameWorkspace: (id: string, name: string) => Promise<void>;
+  deleteWorkspace: (id: string) => Promise<void>;
   current: () => Workspace | null;
 }
 
@@ -38,12 +35,10 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   loaded: false,
   loading: false,
   activeWorkspaceId: readActiveWorkspaceId(),
-  members: [],
-  teams: [],
 
   setActiveWorkspaceId: (id) => {
     writeActiveWorkspaceId(id);
-    set({ activeWorkspaceId: id, members: [], teams: [] });
+    set({ activeWorkspaceId: id });
   },
 
   refresh: async () => {
@@ -72,30 +67,18 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     return workspace;
   },
 
-  refreshMembers: async (workspaceId) => {
-    try {
-      const members = await WorkspacesService.listMembers(workspaceId);
-      set({ members });
-    } catch (error) {
-      logger.error(
-        "Failed to load workspace members",
-        { error: (error as Error).message },
-        "workspaces"
-      );
-    }
+  renameWorkspace: async (id, name) => {
+    const updated = await WorkspacesService.update(id, { name });
+    set((s) => ({ workspaces: s.workspaces.map((w) => (w.id === id ? updated : w)) }));
   },
 
-  refreshTeams: async (workspaceId) => {
-    try {
-      const teams = await TeamsService.list(workspaceId);
-      set({ teams });
-    } catch (error) {
-      logger.error(
-        "Failed to load workspace teams",
-        { error: (error as Error).message },
-        "workspaces"
-      );
-    }
+  deleteWorkspace: async (id) => {
+    await WorkspacesService.remove(id);
+    set((s) => ({
+      workspaces: s.workspaces.filter((w) => w.id !== id),
+      activeWorkspaceId: s.activeWorkspaceId === id ? null : s.activeWorkspaceId,
+    }));
+    if (get().activeWorkspaceId === null) writeActiveWorkspaceId(null);
   },
 
   current: () => {

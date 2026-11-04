@@ -97,11 +97,13 @@ import { formatBytes } from "../utils/formatBytes";
 import { useSettingsStore } from "../stores/settingsStore";
 import { canManageSystemAudioInApp } from "../utils/systemAudioAccess";
 import { WORKSPACES_ENABLED } from "../lib/features";
+import WorkspaceSection from "./settings/WorkspaceSection";
 
 const formatAmount = (cents: number, currency: string) =>
   (cents / 100).toLocaleString(undefined, { style: "currency", currency });
 
 export type SettingsSectionType =
+  | "workspace"
   | "general"
   | "hotkeys"
   | "speechToText"
@@ -1321,6 +1323,9 @@ export default function SettingsPage({
 
   const renderSectionContent = () => {
     switch (activeSection) {
+      case "workspace":
+        return <WorkspaceSection initialSubTab={initialSubTab} />;
+
       case "general":
         return (
           <div className="space-y-6">
